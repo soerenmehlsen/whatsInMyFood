@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link";
-import { MdOutlineFastfood } from "react-icons/md";
+import Image from "next/image";
 import { UserButton, SignedOut, SignInButton, SignUpButton, SignedIn} from '@clerk/nextjs'
 import  React, { useState, useEffect } from 'react';
 import  AnnouncementBanner  from './AnnoncementBanner';
@@ -22,7 +22,13 @@ export function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <MdOutlineFastfood className="h-8 w-8 text-gray-800" />
+            <Image 
+              src="/whatsinmyfood-logo.png" 
+              alt="What's in my food logo" 
+              width={32} 
+              height={32} 
+              className="h-8 w-8" 
+            />
             <span className="text-xl font-bold text-gray-800 sm:text-2xl">
               What&apos;s in my food?
             </span>

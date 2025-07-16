@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
     name: "What's in my food?",
-    short_name: "FoodScan",
+    short_name: "WhatsInMyFood",
     description: "Scan en ingrediensliste og få en analyse af ingredienserne.",
     start_url: "/",
     scope: "/",
