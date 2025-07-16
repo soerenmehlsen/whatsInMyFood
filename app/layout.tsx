@@ -37,6 +37,11 @@ export const metadata: Metadata = {
     "Food Nutrition Analysis",
     "Food Nutrition Level",
   ],
+   appleWebApp: {
+    title: "What's in my food",   
+    capable: true,                
+    statusBarStyle: "default",    
+  },
 };
 
 export default function RootLayout({
