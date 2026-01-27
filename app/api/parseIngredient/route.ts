@@ -1,12 +1,11 @@
-import {GoogleGenerativeAI, SchemaType} from "@google/generative-ai";
+import {GoogleGenerativeAI, SchemaType, type Schema} from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
 // Initialize the Google AI client
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 
 // Defines the JSON schema for a consistent and structured output
-const schema = {
-  description: "Classified ingredient list",
+const schema: Schema = {
   type: SchemaType.ARRAY,
   items: {
     type: SchemaType.OBJECT,
@@ -14,25 +13,21 @@ const schema = {
       name: {
         type: SchemaType.STRING,
         description: "Name of the ingredient",
-        nullable: false,
       },
       description: {
         type: SchemaType.STRING,
         description: "Description of the ingredient",
-        nullable: true,
       },
       nova_classification: {
         type: SchemaType.STRING,
         description: "NOVA classification group",
-        nullable: true,
       },
       reason: {
         type: SchemaType.STRING,
         description: "Reason for the classification",
-        nullable: true,
       },
     },
-    required: ["name"],
+    required: ["name", "description", "nova_classification", "reason"],
   },
 };
 
