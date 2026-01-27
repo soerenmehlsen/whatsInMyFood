@@ -1,11 +1,15 @@
 "use client"
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from 'next/navigation';
+import AnnouncementBanner from './AnnoncementBanner';
 //import { UserButton, SignedOut, SignInButton, SignUpButton, SignedIn} from '@clerk/nextjs'
 import  React, { useState, useEffect } from 'react';
 
 export function Header() {
     const [isMobile, setIsMobile] = useState(false);
+    const pathname = usePathname();
+    const isDashboard = pathname.startsWith('/dashboard');
     
     useEffect(() => {
         const handleResize = () => {
@@ -65,6 +69,12 @@ export function Header() {
       <SignedOut> */}
             </div>
             </div>
+      {!isDashboard && (
+        <AnnouncementBanner
+          message="🎉 Limited Time Offer: Get Access Completely Free!"
+          linkText="Try it Now →"
+        />
+      )}
     </header>
   );
 }

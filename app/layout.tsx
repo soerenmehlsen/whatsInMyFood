@@ -7,7 +7,6 @@ import { Footer } from "./components/footer";
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { PostHogProvider } from "./providers";
-import  AnnouncementBanner  from './components/AnnoncementBanner';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -57,10 +56,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
           <Header />
-          <AnnouncementBanner
-                              message="🎉 Limited Time Offer: Get Access Completely Free!"
-                              linkText="Try it Now →"
-                              />
             <main>{children}</main>
           <GoogleAnalytics gaId="G-CXSN8X36QC" />
           <SpeedInsights />
