@@ -1,7 +1,8 @@
-import { SignedOut} from "@clerk/nextjs";
+// import { SignedOut} from "@clerk/nextjs";
 import { Fade } from "./ui/fade";
 import ResponsiveImage from "./responsiveImage";
-import SignUp from "./SignUpButton";
+import TryNow from "./SignUpButton";
+// import SignUp from "./SignUpButton";
 
 const HeroSection = () => {
     return (
@@ -22,14 +23,20 @@ const HeroSection = () => {
                     </p>
                 </Fade>
             </div>
+            
+            <div className="flex justify-center">
+                <Fade delay={600} direction="up">
+                <TryNow buttonText="Try now" />
+                </Fade>
+            </div>
 
-            <SignedOut>
+            {/* <SignedOut>
                 <div className="flex justify-center">
                     <Fade delay={600} direction="up">
                        <SignUp />
                     </Fade>
                 </div>
-            </SignedOut>
+            </SignedOut> */}
 
             <div className="flex justify-center sm:mt-20 mt-2">
                 <Fade delay={600} direction="up">

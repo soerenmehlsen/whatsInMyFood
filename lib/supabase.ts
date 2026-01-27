@@ -25,7 +25,7 @@ export const uploadImageToSupabase = async (file: File) => {
             throw new Error("Failed to retrieve public URL");
         }
         console.log(publicUrlData.publicUrl);
-        return publicUrlData.publicUrl; // Return the signed URL
+        return publicUrlData.publicUrl; // Return the public URL
     } catch (error) {
         console.error("Error uploading image to Supabase:", error);
         throw error;

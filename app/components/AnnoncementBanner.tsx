@@ -1,4 +1,4 @@
-import { SignUpButton } from "@clerk/nextjs";
+//import { SignUpButton } from "@clerk/nextjs";
 
 interface AnnouncementBannerProps {
     message: string;
@@ -9,8 +9,19 @@ interface AnnouncementBannerProps {
     message, 
     linkText, 
   }: AnnouncementBannerProps) {
-    return (
-      <div className="bg-indigo-600 px-4 py-3 text-white">
+    return ( 
+       <div className="bg-indigo-600 px-4 py-3 text-white">
+        <p className="text-center text-sm font-medium">
+          {message}
+          {linkText && (
+            <button className="inline-block underline ml-1">
+              {linkText}
+            </button>
+        )}
+        </p>
+      </div>
+
+     /*  <div className="bg-indigo-600 px-4 py-3 text-white">
         <p className="text-center text-sm font-medium">
           {message}
           {linkText && (
@@ -21,6 +32,6 @@ interface AnnouncementBannerProps {
           </SignUpButton>
         )}
         </p>
-      </div>
+      </div> */
     );
   }

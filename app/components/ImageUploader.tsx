@@ -41,32 +41,49 @@ export function ImageUploader() {
   };
 
   const handleFileChange = async (file: File) => {
-    const objectUrl = URL.createObjectURL(file);
-    setStatus("uploading");
-    setIngredientUrl(objectUrl);
-    const publicUrl = await uploadImageToSupabase(file);
-    setIngredientUrl(publicUrl);
+    let objectUrl: string | undefined;
+    try {
+      objectUrl = URL.createObjectURL(file);
+      setStatus("uploading");
+      setIngredientUrl(objectUrl);
+      
+      const publicUrl = await uploadImageToSupabase(file);
+      
+      // Clean up the temporary blob URL
+      URL.revokeObjectURL(objectUrl);
+      setIngredientUrl(publicUrl);
 
-    setStatus("parsing");
-    const res = await fetch("/api/parseIngredient", {
-      method: "POST",
-      body: JSON.stringify({ ingredientUrl: publicUrl }),
-    });
+      setStatus("parsing");
+      const res = await fetch("/api/parseIngredient", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ingredientUrl: publicUrl }),
+      });
 
-    if (!res.ok) {
-      throw new Error("Failed to parse ingredient");
+      if (!res.ok) {
+        throw new Error("Failed to parse ingredient");
+      }
+
+      const json = await res.json();
+
+      if (!json.ingredient || !Array.isArray(json.ingredient)) {
+        throw new Error(
+          "Unexpected response structure: 'ingredient' is not an array",
+        );
+      }
+
+      setStatus("created");
+      setParsedIngredient(json.ingredient);
+    } catch (error) {
+      console.error("Error processing image:", error);
+      setStatus("error");
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+      setIngredientUrl(undefined);
     }
-
-    const json = await res.json();
-
-    if (!json.ingredient || !Array.isArray(json.ingredient)) {
-      throw new Error(
-        "Unexpected response structure: 'ingredient' is not an array",
-      );
-    }
-
-    setStatus("created");
-    setParsedIngredient(json.ingredient);
   };
 
   const filteredIngredient = (parsedIngredient || [])
@@ -196,10 +213,16 @@ export function ImageUploader() {
       )}
 
       {status === "error" && (
-        <div className="mt-10 flex flex-col items-center max-w-2xl mx-auto">
+        <div className="mt-10 flex flex-col items-center max-w-2xl mx-auto space-y-4">
           <p className="text-lg text-red-600">
             Oops! Something went wrong. Please try again.
           </p>
+          <button
+            onClick={handleReset}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+          >
+            Try Again
+          </button>
         </div>
       )}
 

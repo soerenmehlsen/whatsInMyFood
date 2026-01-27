@@ -7,8 +7,7 @@
 ## Tech stack
 
 - **Framework**: Next.js 15 with App Router
-- **AI/ML**: Google Generative AI (Gemini 2.5 Pro for ingredient analysis)
-- **Authentication**: Clerk (handles user sign-in/sign-up)
+- **AI/ML**: Google Generative AI (Gemini 3 Flash for ingredient analysis)
 - **Storage**: Supabase (stores uploaded images)
 - **Analytics**: PostHog (user behavior tracking), Google Analytics, Vercel Speed Insights
 - **Styling**: Tailwind CSS, Framer Motion for animations

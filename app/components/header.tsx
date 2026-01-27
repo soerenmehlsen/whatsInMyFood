@@ -1,9 +1,8 @@
 "use client"
 import Link from "next/link";
 import Image from "next/image";
-import { UserButton, SignedOut, SignInButton, SignUpButton, SignedIn} from '@clerk/nextjs'
+//import { UserButton, SignedOut, SignInButton, SignUpButton, SignedIn} from '@clerk/nextjs'
 import  React, { useState, useEffect } from 'react';
-import  AnnouncementBanner  from './AnnoncementBanner';
 
 export function Header() {
     const [isMobile, setIsMobile] = useState(false);
@@ -34,7 +33,7 @@ export function Header() {
             </span>
           </Link>
 
-          <SignedOut>
+  {/*         <SignedOut>
             <div className="flex space-x-2">
               <SignInButton>
                 <button
@@ -63,14 +62,9 @@ export function Header() {
           </SignedIn>
         </div>
       </div>
-      <SignedOut>
-      <div className="text-center mx-auto ">
-                <AnnouncementBanner
-                    message="🎉 Limited Time Offer: Get Access Completely Free!"
-                    linkText="Try it Now →"
-                    />
+      <SignedOut> */}
             </div>
-            </SignedOut>
+            </div>
     </header>
   );
 }
