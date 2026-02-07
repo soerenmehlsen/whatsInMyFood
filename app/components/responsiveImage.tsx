@@ -1,32 +1,15 @@
-"use client";
+import Image from "next/image";
+import heroImage from "@/public/Iphones.png";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-
-// Change the image based on the screen size
 const ResponsiveImage = () => {
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth <= 768);
-        };
-
-        handleResize();
-        window.addEventListener('resize', handleResize);
-
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
-
     return (
         <Image
-            src={isMobile ? "/Iphones-mobile.png" : "/Iphones.png"}
+            src={heroImage}
             alt="Hero section image"
-            width={1200}
-            height={1000}
             priority
+            placeholder="blur"
+            sizes="(max-width: 640px) 92vw, (max-width: 1024px) 80vw, 1200px"
+            className="h-auto w-full max-w-5xl"
         />
     );
 };
