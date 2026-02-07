@@ -62,15 +62,10 @@ export function IngredientGrid({ items }: IngredientGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {items.map((item) => (
-        <motion.div
-          key={item.name}
-          layout
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
+        <div
           className={`bg-white rounded-lg shadow-md overflow-hidden${
             expandItem === item.name ? "shadow-lg" : "shadow-md"
-          } hover:shadow-lg hover:scale-125 transition-transform duration-300`}
+          } hover:shadow-lg hover:scale-110 transition-transform duration-300`}
           onClick={() => handleExpand(item.name)}
         >
           <div className="p-4 relative pt-2 sm:pt-8">
@@ -97,7 +92,7 @@ export function IngredientGrid({ items }: IngredientGridProps) {
               {item.reason}
             </motion.p>
           </div>
-        </motion.div>
+        </div>
       ))}
     </div>
   );
