@@ -6,12 +6,12 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 export default function FilterDropdown({
   onFilterChange,
 }: {
-  onFilterChange: (selected: string[]) => void;
+  onFilterChange: (selected: number[]) => void;
 }) {
   // State to track selected NOVA classifications
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [selectedFilters, setSelectedFilters] = useState<number[]>([]);
 
-  const handleFilterChange = (value: string) => {
+  const handleFilterChange = (value: number) => {
     const newFilters = selectedFilters.includes(value)
       ? selectedFilters.filter((filter) => filter !== value) // Remove filter if already selected
       : [...selectedFilters, value]; // Add filter if not selected
@@ -67,8 +67,8 @@ export default function FilterDropdown({
                         type="checkbox"
                         id={`FilterNova${nova}`}
                         className="size-5 rounded-sm border-gray-300"
-                        checked={selectedFilters.includes(`${nova}`)} 
-                        onChange={() => handleFilterChange(`${nova}`)}
+                        checked={selectedFilters.includes(nova)} 
+                        onChange={() => handleFilterChange(nova)}
                       />
                       <span className="text-sm font-medium text-gray-700">
                         Nova {nova}

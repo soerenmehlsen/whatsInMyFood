@@ -14,7 +14,7 @@ import FilterDropdown from "./FilterDropdown";
 export interface IngredientItem {
   name: string;
   description: string;
-  nova_classification: string;
+  nova_classification: number;
   reason: string;
 }
 
@@ -29,7 +29,7 @@ export function ImageUploader() {
     [],
   );
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedNovaFilters, setSelectedNovaFilters] = useState<string[]>([]);
+  const [selectedNovaFilters, setSelectedNovaFilters] = useState<number[]>([]);
 
    // Reset function
    const handleReset = () => {
@@ -75,7 +75,11 @@ export function ImageUploader() {
       }
 
       setStatus("created");
-      setParsedIngredient(json.ingredient);
+      const normalizedIngredients = json.ingredient.map((item: IngredientItem) => ({
+        ...item,
+        nova_classification: Number(item.nova_classification),
+      }));
+      setParsedIngredient(normalizedIngredients);
     } catch (error) {
       console.error("Error processing image:", error);
       setStatus("error");

@@ -14,45 +14,45 @@ export function IngredientGrid({ items }: IngredientGridProps) {
     setExpandItem((prev) => (prev === itemName ? null : itemName));
   };
 
-  const novaLabelsColor = (novaClassification: string) => {
+  const novaLabelsColor = (novaClassification: number) => {
     switch (novaClassification) {
-      case "1":
+      case 1:
         return "bg-green-100 text-green-800";
-      case "2":
+      case 2:
         return "bg-blue-100 text-blue-800";
-      case "3":
+      case 3:
         return "bg-yellow-100 text-yellow-800";
-      case "4":
+      case 4:
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
   };
 
-  const shortNovaLabel = (novaClassification: string) => {
+  const shortNovaLabel = (novaClassification: number) => {
     switch (novaClassification) {
-      case "1":
+      case 1:
         return "NOVA 1";
-      case "2":
+      case 2:
         return "NOVA 2";
-      case "3":
+      case 3:
         return "NOVA 3";
-      case "4":
+      case 4:
         return "NOVA 4";
       default:
         return "Unknown NOVA";
     }
   };
 
-  const NovaInfo = (novaClassification: string) => {
+  const NovaInfo = (novaClassification: number) => {
     switch (novaClassification) {
-      case "1":
+      case 1:
         return "1. Unprocessed or minimally processed foods";
-      case "2":
+      case 2:
         return "2. Processed culinary ingredients";
-      case "3":
+      case 3:
         return "3. Processed foods";
-      case "4":
+      case 4:
         return "4. Ultra-processed foods";
       default:
         return "Unknown NOVA";
@@ -76,13 +76,13 @@ export function IngredientGrid({ items }: IngredientGridProps) {
           <div className="p-4 relative pt-2 sm:pt-8">
             <h3 className="text-lg font-semibold mb-1">{item.name}</h3>
 
-            <Tooltip title={NovaInfo(item.nova_classification)}>
+            <Tooltip title={NovaInfo(Number(item.nova_classification))}>
               <span
                 className={`absolute top-2 right-2 px-2 py-1 text-xs font-semibold rounded-full ${novaLabelsColor(
-                  item.nova_classification,
+                  Number(item.nova_classification),
                 )}`}
               >
-                {shortNovaLabel(item.nova_classification)}
+                {shortNovaLabel(Number(item.nova_classification))}
               </span>
             </Tooltip>
 
