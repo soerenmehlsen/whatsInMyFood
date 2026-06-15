@@ -8,6 +8,7 @@ import { AnimatePresence } from "framer-motion";
 import CameraModal from "./CameraModal";
 import { Input } from "./ui/input";
 import { IngredientGrid } from "./ingredient-grid";
+import { ResultSummary } from "./ResultSummary";
 import { Fade } from "./ui/fade";
 import { exampleUrl, exampleIngredient } from "@/lib/consant";
 import FilterDropdown from "./FilterDropdown";  
@@ -32,6 +33,7 @@ export function ImageUploader() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedNovaFilters, setSelectedNovaFilters] = useState<number[]>([]);
   const [showCamera, setShowCamera] = useState(false);
+  const [language, setLanguage] = useState<string>("en");
 
    // Reset function
    const handleReset = () => {
@@ -41,6 +43,7 @@ export function ImageUploader() {
     setSearchTerm("");
     setSelectedNovaFilters([]);
     setShowCamera(false);
+    setLanguage("en");
   };
 
   const handleFileChange = async (file: File) => {
@@ -78,6 +81,7 @@ export function ImageUploader() {
       }
 
       setStatus("created");
+      setLanguage(typeof json.language === "string" ? json.language : "en");
       const normalizedIngredients = json.ingredient.map((item: IngredientItem) => ({
         ...item,
         nova_classification: Number(item.nova_classification),
@@ -93,14 +97,15 @@ export function ImageUploader() {
     }
   };
 
-  const filteredIngredient = (parsedIngredient || [])
+  const filteredIngredient = [...(parsedIngredient || [])]
     .filter((item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    .filter((item) => 
-      selectedNovaFilters.length === 0 || 
+    .filter((item) =>
+      selectedNovaFilters.length === 0 ||
       selectedNovaFilters.includes(item.nova_classification)
-    );
+    )
+    .sort((a, b) => b.nova_classification - a.nova_classification);
 
   const handleExampleImage = async () => {
     setStatus("uploading");
@@ -111,6 +116,7 @@ export function ImageUploader() {
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     setStatus("created");
+    setLanguage("da");
     setParsedIngredient(exampleIngredient);
   };
 
@@ -229,6 +235,7 @@ export function ImageUploader() {
           <h2 className="text-4xl font-bold mb-5">
             Found {parsedIngredient.length} ingredients
           </h2>
+          <ResultSummary items={parsedIngredient} language={language} />
           <div className="flex gap-4 mb-6">
           <div className="relative flex-1">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />

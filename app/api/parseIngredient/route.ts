@@ -6,29 +6,40 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 
 // Defines the JSON schema for a consistent and structured output
 const schema: Schema = {
-  type: SchemaType.ARRAY,
-  items: {
-    type: SchemaType.OBJECT,
-    properties: {
-      name: {
-        type: SchemaType.STRING,
-        description: "Name of the ingredient",
-      },
-      description: {
-        type: SchemaType.STRING,
-        description: "Description of the ingredient",
-      },
-      nova_classification: {
-        type: SchemaType.NUMBER,
-        description: "NOVA classification group (1-4)",
-      },
-      reason: {
-        type: SchemaType.STRING,
-        description: "Reason for the classification",
+  type: SchemaType.OBJECT,
+  properties: {
+    language: {
+      type: SchemaType.STRING,
+      description:
+        "ISO 639-1 code of the language used by the ingredient names (e.g. 'da', 'en')",
+    },
+    ingredient: {
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          name: {
+            type: SchemaType.STRING,
+            description: "Name of the ingredient",
+          },
+          description: {
+            type: SchemaType.STRING,
+            description: "Description of the ingredient",
+          },
+          nova_classification: {
+            type: SchemaType.NUMBER,
+            description: "NOVA classification group (1-4)",
+          },
+          reason: {
+            type: SchemaType.STRING,
+            description: "Reason for the classification",
+          },
+        },
+        required: ["name", "description", "nova_classification", "reason"],
       },
     },
-    required: ["name", "description", "nova_classification", "reason"],
   },
+  required: ["language", "ingredient"],
 };
 
 export async function POST(request: Request) {
@@ -71,7 +82,9 @@ NOVA Classification Groups:
 1. Unprocessed or minimally processed foods: These are natural foods that have been cleaned, sliced, or otherwise minimally altered.
 2. Processed culinary ingredients: These include items like sugar, oils, and salts, which are derived from natural foods but used to prepare other dishes.
 3. Processed foods: Foods that combine natural ingredients with culinary ingredients and undergo preservation methods like canning or freezing.
-4. Ultra-processed foods: These are industrially formulated products with ingredients like emulsifiers, preservatives, and artificial flavors.`;
+4. Ultra-processed foods: These are industrially formulated products with ingredients like emulsifiers, preservatives, and artificial flavors.
+
+Also return a top-level 'language' field: the ISO 639-1 code (e.g. 'da', 'en') of the language used by the ingredient names. Put every ingredient in the 'ingredient' array.`;
 
   const outputStartTime = Date.now();
 
@@ -99,10 +112,10 @@ NOVA Classification Groups:
   
   // Parse the response as JSON
   const response = await result.response;
-  let parsedIngredients;
+  let parsed;
   try {
-    parsedIngredients = JSON.parse(response.text());
-    console.log({ parsedIngredients });
+    parsed = JSON.parse(response.text());
+    console.log({ parsed });
   } catch (error) {
     console.error('Error parsing ingredients JSON:', error);
     return NextResponse.json(
@@ -114,7 +127,11 @@ NOVA Classification Groups:
   // Log the total request duration
   console.log(`Total request duration: ${Date.now() - outputStartTime}ms`);
 
-  return NextResponse.json({ success: true, ingredient: parsedIngredients });
+  return NextResponse.json({
+    success: true,
+    ingredient: parsed.ingredient,
+    language: typeof parsed.language === "string" ? parsed.language : "en",
+  });
 
 } catch (error) {
     // Logging the error
