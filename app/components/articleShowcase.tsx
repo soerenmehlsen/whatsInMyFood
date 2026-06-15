@@ -31,7 +31,7 @@ export default function ArticleShowcase() {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
-    
+
     return (
         <div className="max-w-6xl mx-auto p-4 overflow-hidden">
             <div className="relative ">
@@ -62,28 +62,39 @@ export default function ArticleShowcase() {
                 </div>
             </div>
 
-            <div className="flex justify-center items-center gap-4 mt-4">
+            <div className="mt-8 flex items-center justify-center gap-5">
                 <button
                     onClick={prev}
-                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 shadow-sm transition-all duration-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-md active:scale-95"
                     aria-label="Previous slide"
                 >
-                    <ChevronLeft className="w-5 h-5" />
+                    <ChevronLeft className="h-5 w-5" />
                 </button>
 
-                <span className="text-sm font-medium">
-                    {current + 1} / {posts.length}
-                </span>
+                <div className="flex items-center gap-2">
+                    {posts.map((_, index) => (
+                        <button
+                            key={index}
+                            onClick={() => setCurrent(index)}
+                            aria-label={`Go to slide ${index + 1}`}
+                            aria-current={index === current}
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                                index === current
+                                    ? 'w-6 bg-blue-500'
+                                    : 'w-2 bg-zinc-300 hover:bg-zinc-400'
+                            }`}
+                        />
+                    ))}
+                </div>
 
                 <button
                     onClick={next}
-                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 shadow-sm transition-all duration-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-md active:scale-95"
                     aria-label="Next slide"
                 >
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="h-5 w-5" />
                 </button>
             </div>
         </div>
     );
 }
-

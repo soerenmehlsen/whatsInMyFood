@@ -8,8 +8,8 @@ const ResponsiveImage = () => {
             alt="Hero section image"
             priority
             placeholder="blur"
-            sizes="(max-width: 640px) 92vw, (max-width: 1024px) 80vw, 1200px"
-            className="h-auto w-full max-w-5xl"
+            sizes="(max-width: 640px) 96vw, (max-width: 1024px) 90vw, 1280px"
+            className="h-auto w-full max-w-7xl"
         />
     );
 };

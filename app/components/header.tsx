@@ -1,16 +1,12 @@
 "use client"
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from 'next/navigation';
-import AnnouncementBanner from './AnnoncementBanner';
 //import { UserButton, SignedOut, SignInButton, SignUpButton, SignedIn} from '@clerk/nextjs'
 import  React, { useState, useEffect } from 'react';
 
 export function Header() {
     const [isMobile, setIsMobile] = useState(false);
-    const pathname = usePathname();
-    const isDashboard = pathname.startsWith('/dashboard');
-    
+
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 640);
@@ -21,19 +17,20 @@ export function Header() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
   return (
-    <header className=" bg-white border-b border-gray-200">
+    <header className="sticky top-0 z-50 border-b border-zinc-200/70 bg-white/70 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
       <div className="container mx-auto px-4 py-4">
         <div className={`flex items-center justify-between ${isMobile ? 'flex-col' : 'flex-row'}`}>
-          <Link href="/" className="flex items-center space-x-2">
-            <Image 
-              src="/whatsinmyfood-logo.png" 
-              alt="What's in my food logo" 
-              width={32} 
-              height={32} 
-              className="h-8 w-8" 
+          <Link href="/" className="group flex items-center space-x-2">
+            <Image
+              src="/whatsinmyfood-logo.png"
+              alt="What's in my food logo"
+              width={32}
+              height={32}
+              className="h-8 w-8 transition-transform duration-200 group-hover:scale-105"
             />
-            <span className="text-xl font-bold text-gray-800 sm:text-2xl">
-              What&apos;s in my food?
+            <span className="text-xl font-bold tracking-tight text-zinc-900 sm:text-2xl">
+              What&apos;s in my{" "}
+              <span>food</span>?
             </span>
           </Link>
 
@@ -69,12 +66,6 @@ export function Header() {
       <SignedOut> */}
             </div>
             </div>
-      {!isDashboard && (
-        <AnnouncementBanner
-          message="🎉 Limited Time Offer: Get Access Completely Free!"
-          linkText="Try it Now →"
-        />
-      )}
     </header>
   );
 }

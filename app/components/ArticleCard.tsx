@@ -10,7 +10,7 @@ interface article {
 }
 
 const ArticleCard = ({ article, formatDate }: { article: article, formatDate: (date: string) => string }) => (
-    <article className="group relative text-left overflow-hidden rounded-lg shadow hover:shadow-lg transition-shadow duration-300 w-full max-w-sm md:max-w-md lg:max-w-lg mx-auto sm:h-96 h-72">
+    <article className="group relative text-left overflow-hidden rounded-2xl shadow-sm ring-1 ring-zinc-900/5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 w-full max-w-sm md:max-w-md lg:max-w-lg mx-auto sm:h-96 h-72">
         <div className="aspect-w-16 aspect-h-9 w-full">
             <Image
                 src={article.Image}
