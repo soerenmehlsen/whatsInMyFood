@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   CameraIcon,
   XMarkIcon,
@@ -64,6 +64,14 @@ export default function CameraModal({ onCapture, onClose }: CameraModalProps) {
     };
   }, [stopStream]);
 
+  // Reattach the live stream to the video element whenever the live view shows
+  // (the <video> remounts on view changes, e.g. after "retake").
+  useEffect(() => {
+    if (view === "live" && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [view]);
+
   // Revoke the preview object URL whenever it changes or on unmount.
   useEffect(() => {
     return () => {
@@ -120,8 +128,7 @@ export default function CameraModal({ onCapture, onClose }: CameraModalProps) {
   };
 
   return (
-    <AnimatePresence>
-      <motion.div
+    <motion.div
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -206,6 +213,5 @@ export default function CameraModal({ onCapture, onClose }: CameraModalProps) {
           <canvas ref={canvasRef} className="hidden" />
         </motion.div>
       </motion.div>
-    </AnimatePresence>
   );
 }
