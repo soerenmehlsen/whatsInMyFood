@@ -2,8 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background: #ffffff;
+  --foreground: #1d1d1f;
+
+  --surface: #ffffff;
+  --ink: #1d1d1f;
+  --muted: #86868b;
+  --hairline: #ececec;
+  --hairline-strong: #d2d2d7;
+
+  --accent: #34c759;
+  --accent-hover: #2aa64c;
+  --accent-fg: #1a8f3c;
+  --accent-ring: rgba(52, 199, 89, 0.4);
+}
+
 body {
-  color: var(--foreground);
+  color: var(--ink);
   background: var(--background);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
