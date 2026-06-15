@@ -20,11 +20,11 @@ assert.equal(computeVerdict([]), null, "empty input -> null");
 assert.equal(
   computeVerdict([{ name: "x", nova_classification: 9 }]),
   null,
-  "invalid nova-only input -> null",
+  "single item with out-of-range nova -> null",
 );
 
 // E-number detection
-assert.equal(isAdditive({ name: "E451", nova_classification: 4 }), true);
-assert.equal(isAdditive({ name: "Salt", nova_classification: 2 }), false);
+assert.equal(isAdditive("E451"), true);
+assert.equal(isAdditive("Salt"), false);
 
 console.log("verdict.test.mts: all assertions passed");

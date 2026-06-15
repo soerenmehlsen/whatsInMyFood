@@ -25,8 +25,8 @@ export interface Verdict {
 
 const E_NUMBER = /^E\d{3}/i;
 
-export function isAdditive(item: VerdictInput): boolean {
-  return E_NUMBER.test(item.name.trim());
+export function isAdditive(name: string): boolean {
+  return E_NUMBER.test(name.trim());
 }
 
 function asGroup(value: number): NovaGroup | null {
@@ -44,7 +44,7 @@ export function computeVerdict(items: VerdictInput[]): Verdict | null {
     if (group === null) continue; // ignore out-of-range values
     total += 1;
     counts.set(group, (counts.get(group) ?? 0) + 1);
-    if (isAdditive(item)) additiveCount += 1;
+    if (isAdditive(item.name)) additiveCount += 1;
   }
 
   if (total === 0) return null;
