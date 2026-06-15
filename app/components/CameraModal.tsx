@@ -50,7 +50,7 @@ export default function CameraModal({ onCapture, onClose }: CameraModalProps) {
       } catch {
         if (!cancelled) {
           setError(
-            "Kunne ikke få adgang til kameraet. Giv tilladelse og prøv igen.",
+            "Could not access the camera. Please grant permission and try again.",
           );
         }
       }
@@ -144,7 +144,7 @@ export default function CameraModal({ onCapture, onClose }: CameraModalProps) {
         >
           <button
             onClick={onClose}
-            aria-label="Luk"
+            aria-label="Close"
             className="absolute right-3 top-3 z-10 rounded-full bg-black/50 p-2 text-white transition hover:bg-black/70"
           >
             <XMarkIcon className="h-5 w-5" />
@@ -157,7 +157,7 @@ export default function CameraModal({ onCapture, onClose }: CameraModalProps) {
                 onClick={onClose}
                 className="rounded-lg bg-white px-4 py-2 font-medium text-gray-900 transition hover:bg-gray-200"
               >
-                Luk
+                Close
               </button>
             </div>
           ) : view === "live" ? (
@@ -172,7 +172,7 @@ export default function CameraModal({ onCapture, onClose }: CameraModalProps) {
               <div className="flex items-center justify-center bg-black py-5">
                 <button
                   onClick={handleCapture}
-                  aria-label="Tag billede"
+                  aria-label="Take picture"
                   className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-gray-900 ring-4 ring-white/40 transition hover:bg-gray-100"
                 >
                   <CameraIcon className="h-7 w-7" />
@@ -184,7 +184,7 @@ export default function CameraModal({ onCapture, onClose }: CameraModalProps) {
               {previewUrl && (
                 <Image
                   src={previewUrl}
-                  alt="Optaget billede"
+                  alt="Captured image"
                   width={1024}
                   height={768}
                   unoptimized
@@ -197,14 +197,14 @@ export default function CameraModal({ onCapture, onClose }: CameraModalProps) {
                   className="flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2 font-medium text-white transition hover:bg-white/20"
                 >
                   <ArrowPathIcon className="h-5 w-5" />
-                  Tag om
+                  Retake
                 </button>
                 <button
                   onClick={handleConfirm}
                   className="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 font-medium text-white transition hover:bg-blue-600"
                 >
                   <CheckIcon className="h-5 w-5" />
-                  Brug billede
+                  Use photo
                 </button>
               </div>
             </>
