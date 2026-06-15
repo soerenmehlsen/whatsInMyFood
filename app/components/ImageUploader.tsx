@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import Dropzone from "react-dropzone";
 import { uploadImageToSupabase } from "@/lib/supabase";
-import { PhotoIcon, MagnifyingGlassIcon } from "@heroicons/react/20/solid";
+import { CameraIcon, MagnifyingGlassIcon } from "@heroicons/react/20/solid";
+import { AnimatePresence } from "framer-motion";
+import CameraModal from "./CameraModal";
 import { Input } from "./ui/input";
 import { IngredientGrid } from "./ingredient-grid";
 import { Fade } from "./ui/fade";
@@ -30,6 +31,7 @@ export function ImageUploader() {
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedNovaFilters, setSelectedNovaFilters] = useState<number[]>([]);
+  const [showCamera, setShowCamera] = useState(false);
 
    // Reset function
    const handleReset = () => {
@@ -38,6 +40,7 @@ export function ImageUploader() {
     setParsedIngredient([]);
     setSearchTerm("");
     setSelectedNovaFilters([]);
+    setShowCamera(false);
   };
 
   const handleFileChange = async (file: File) => {
@@ -117,41 +120,21 @@ export function ImageUploader() {
         <>
         <div className="max-w-2xl mx-auto">
           <Fade direction="right" delay={300}>
-            <Dropzone
-              accept={{
-                "image/*": [".jpg", ".jpeg", ".png"],
-              }}
-              multiple={false}
-              onDrop={(acceptedFiles) => handleFileChange(acceptedFiles[0])}
+            <button
+              onClick={() => setShowCamera(true)}
+              className="mt-2 flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 transition hover:border-blue-500"
             >
-              {({ getRootProps, getInputProps, isDragAccept }) => (
-                <div
-                  className={`mt-2 flex aspect-video cursor-pointer items-center justify-center rounded-lg border-2 border-dashed ${
-                    isDragAccept ? "border-blue-500" : "border-gray-300"
-                  }`}
-                  {...getRootProps()}
-                >
-                  <input {...getInputProps()} />
-                  <div className="text-center">
-                    <PhotoIcon
-                      className="mx-auto h-12 w-12 text-gray-300"
-                      aria-hidden="true"
-                    />
-                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                      <label
-                        htmlFor="file-upload"
-                        className="relative rounded-md bg-white font-semibold text-gray-800 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:text-gray-600"
-                      >
-                        <p className="text-xl">Upload your ingredient list</p>
-                        <p className="mt-1 font-normal text-gray-600">
-                          or take a picture
-                        </p>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </Dropzone>
+              <CameraIcon
+                className="h-12 w-12 text-gray-300"
+                aria-hidden="true"
+              />
+              <p className="mt-4 text-xl font-semibold text-gray-800">
+                Scan your ingredient list
+              </p>
+              <p className="mt-1 text-sm text-gray-600">
+                Open the camera to take a picture
+              </p>
+            </button>
           </Fade>
           </div>
           
@@ -165,6 +148,17 @@ export function ImageUploader() {
             </button>
           </Fade>
           </div>
+          <AnimatePresence>
+            {showCamera && (
+              <CameraModal
+                onClose={() => setShowCamera(false)}
+                onCapture={(file) => {
+                  setShowCamera(false);
+                  handleFileChange(file);
+                }}
+              />
+            )}
+          </AnimatePresence>
         </>
       )}
 
