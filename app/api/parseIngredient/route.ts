@@ -58,11 +58,26 @@ export async function POST(request: Request) {
     );
   }
 
-  const formData = await request.formData();
-  const image = formData.get("image");
-  if (!(image instanceof File)) {
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
     return NextResponse.json(
-      { error: "No image provided" },
+      { error: "No image or text provided" },
+      { status: 400 },
+    );
+  }
+  const image = formData.get("image");
+  const textInput = formData.get("text");
+  const ingredientText =
+    typeof textInput === "string" ? textInput.trim() : "";
+
+  const hasImage = image instanceof File;
+  const hasText = ingredientText.length > 0;
+
+  if (!hasImage && !hasText) {
+    return NextResponse.json(
+      { error: "No image or text provided" },
       { status: 400 },
     );
   }
@@ -100,20 +115,26 @@ Also return a top-level 'language' field: the ISO 639-1 code (e.g. 'da', 'en') o
 
   const outputStartTime = Date.now();
 
-  // Convert the uploaded image to base64
-  const imageData = await image.arrayBuffer();
-  const base64Image = Buffer.from(imageData).toString("base64");
+  // The prompt is written for image input; for already-extracted text we prepend a
+  // one-line note so the model treats the text as the ingredient list verbatim.
+  const textPreamble =
+    "The following is the already-extracted ingredient list text from a product label. " +
+    "Treat it as the ingredient source (no image is provided):\n\n";
+
+  const parts = hasImage
+    ? [
+        { text: systemPrompt },
+        {
+          inlineData: {
+            mimeType: "image/jpeg",
+            data: Buffer.from(await (image as File).arrayBuffer()).toString("base64"),
+          },
+        },
+      ]
+    : [{ text: systemPrompt }, { text: textPreamble + ingredientText }];
 
   // Api request to the model
-  const result = await model.generateContent([
-    { text: systemPrompt },
-    {
-      inlineData: {
-        mimeType: "image/jpeg",
-        data: base64Image
-      }
-    }
-  ]);
+  const result = await model.generateContent(parts);
   
   // Parse the response as JSON
   const response = await result.response;
