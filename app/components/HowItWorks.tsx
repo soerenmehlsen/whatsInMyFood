@@ -24,14 +24,14 @@ const HowItWorks = () => {
         <div id="how-it-works" className="scroll-mt-24">
             <Fade direction="up" delay={300} cascade damping={0.1} triggerOnce={true}>
                 <div className="mt-20 flex justify-center sm:mt-36">
-                    <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50/70 px-4 py-1.5 text-sm font-medium text-blue-700">
+                    <span className="inline-flex items-center rounded-full border border-[#34c759]/40 bg-[#34c759]/10 px-4 py-1.5 text-sm font-medium text-accent-fg">
                         How it works
                     </span>
                 </div>
 
                 <h2 className="mt-6 text-balance text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl">
                     Three steps to{" "}
-                    <span className="bg-gradient-to-r from-blue-600 to-sky-500 bg-clip-text text-transparent">
+                    <span className="bg-gradient-to-r from-[#1a8f3c] to-[#34c759] bg-clip-text text-transparent">
                         cleaner choices
                     </span>
                 </h2>
@@ -44,8 +44,8 @@ const HowItWorks = () => {
                     {steps.map((step) => (
                         <div
                             key={step.number}
-                            className="group relative rounded-2xl border border-zinc-100 bg-white/60 p-8 shadow-sm ring-1 ring-zinc-900/5 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-md">
-                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-sky-500 text-xl font-bold text-white shadow-lg shadow-blue-600/20 transition-transform duration-300 group-hover:scale-105">
+                            className="group relative rounded-2xl border border-zinc-100 bg-white/60 p-8 shadow-sm ring-1 ring-zinc-900/5 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-[#34c759]/40 hover:shadow-md">
+                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#1a8f3c] to-[#34c759] text-xl font-bold text-white shadow-lg shadow-[#34c759]/20 transition-transform duration-300 group-hover:scale-105">
                                 {step.number}
                             </div>
                             <h3 className="mt-6 text-xl font-bold text-zinc-900">

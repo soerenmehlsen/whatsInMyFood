@@ -5,14 +5,14 @@ const WhyItMatters = () => {
   return (
       <Fade direction="up" delay={300} cascade damping={0.1} triggerOnce={true}>
           <div className="mt-20 flex justify-center sm:mt-36">
-              <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50/70 px-4 py-1.5 text-sm font-medium text-blue-700">
+              <span className="inline-flex items-center rounded-full border border-[#34c759]/40 bg-[#34c759]/10 px-4 py-1.5 text-sm font-medium text-accent-fg">
                   Why it matters
               </span>
           </div>
 
           <h2 className="mt-6 text-balance text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl">
               Know what&apos;s{" "}
-              <span className="bg-gradient-to-r from-blue-600 to-sky-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#1a8f3c] to-[#34c759] bg-clip-text text-transparent">
                   really
               </span>{" "}
               in your food
