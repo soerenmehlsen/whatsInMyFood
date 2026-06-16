@@ -28,9 +28,8 @@ export function Header() {
               height={32}
               className="h-8 w-8 transition-transform duration-200 group-hover:scale-105"
             />
-            <span className="text-xl font-bold tracking-tight text-zinc-900 sm:text-2xl">
-              What&apos;s in my{" "}
-              <span>food</span>?
+            <span className="text-xl font-bold tracking-tight text-ink sm:text-2xl">
+              What&apos;s in my food?
             </span>
           </Link>
 

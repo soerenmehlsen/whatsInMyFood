@@ -3,7 +3,12 @@
 import Image from "next/image";
 import { useState } from "react";
 import { uploadImageToSupabase } from "@/lib/supabase";
-import { CameraIcon, MagnifyingGlassIcon } from "@heroicons/react/20/solid";
+import {
+  CameraIcon,
+  MagnifyingGlassIcon,
+  ArrowUpTrayIcon,
+} from "@heroicons/react/20/solid";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence } from "framer-motion";
 import CameraModal from "./CameraModal";
 import { Input } from "./ui/input";
@@ -121,39 +126,39 @@ export function ImageUploader() {
   };
 
   return (
-    <div className="container text-center px-4 py-8 max-w-full mx-auto">
+    <div className="container mx-auto max-w-full px-4 py-10 text-center">
       {status === "initial" && (
         <>
-        <div className="max-w-2xl mx-auto">
-          <Fade direction="right" delay={300}>
+        <div className="mx-auto max-w-xl">
+          <Fade direction="up" delay={300}>
             <button
               onClick={() => setShowCamera(true)}
-              className="mt-2 flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 transition hover:border-blue-500"
+              className="group mt-2 flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-hairline-strong bg-surface transition hover:border-accent"
             >
-              <CameraIcon
-                className="h-12 w-12 text-gray-300"
-                aria-hidden="true"
-              />
-              <p className="mt-4 text-xl font-semibold text-gray-800">
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#34c759]/10 transition group-hover:bg-[#34c759]/15">
+                <CameraIcon className="h-7 w-7 text-accent" aria-hidden="true" />
+              </span>
+              <p className="mt-4 text-xl font-semibold tracking-tight text-ink">
                 Scan your ingredient list
               </p>
-              <p className="mt-1 text-sm text-gray-600">
-                Open the camera to take a picture
+              <p className="mt-1 text-sm text-muted">
+                Take a photo and let AI break it down
               </p>
             </button>
           </Fade>
+
+          <div className="mt-6 flex flex-col items-center gap-3">
+            <Fade direction="up" delay={400}>
+              <button
+                onClick={handleExampleImage}
+                className="text-sm font-semibold text-accent-fg transition hover:underline"
+              >
+                Need an example image? Try here →
+              </button>
+            </Fade>
+            <p className="text-xs text-muted">Free · No sign-up needed</p>
           </div>
-          
-          <div className="flex justify-center w-full my-5">
-          <Fade direction="up" delay={400}>
-            <button
-              className="mt-5 font-medium text-blue-400 text-md underline decoration-transparent hover:decoration-blue-200 decoration-2 underline-offset-4 transition hover:text-blue-500"
-              onClick={handleExampleImage}
-            >
-              Need an example image? Try here.
-            </button>
-          </Fade>
-          </div>
+        </div>
           <AnimatePresence>
             {showCamera && (
               <CameraModal
@@ -169,14 +174,20 @@ export function ImageUploader() {
       )}
 
       {ingredientUrl && (
-        <div className="my-10 mx-auto flex flex-col items-center max-w-2xl">
-          <p className="text-lg text-gray-600 mb-4 cursor-pointer" onClick={handleReset}>Upload a new image</p>
+        <div className="mx-auto my-10 flex max-w-2xl flex-col items-center">
+          <button
+            onClick={handleReset}
+            className="mb-4 inline-flex items-center gap-2 rounded-full border border-hairline-strong bg-surface px-4 py-2 text-sm font-medium text-ink transition hover:border-muted"
+          >
+            <ArrowUpTrayIcon className="h-4 w-4" />
+            Upload a new image
+          </button>
           <Image
             width={1024}
             height={768}
             src={ingredientUrl}
-            alt="Menu"
-            className="w-40 rounded-lg shadow-md"
+            alt="Scanned ingredient label"
+            className="w-40 rounded-2xl border border-hairline shadow-sm"
           />
         </div>
       )}
@@ -184,11 +195,11 @@ export function ImageUploader() {
       {status === "uploading" && (
         <div className="mt-10 flex flex-col items-center max-w-2xl mx-auto">
           <div className="flex items-center space-x-4 mb-6">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500" />
-            <p className="text-lg text-gray-600">Uploading your image...</p>
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-hairline border-t-accent" />
+            <p className="text-lg text-muted">Uploading your image...</p>
           </div>
           <div className="w-full max-w-2xl space-y-4">
-            <div className="h-8 bg-gray-200 rounded-lg animate-pulse" />
+            <div className="h-8 bg-gray-100 rounded-lg animate-pulse" />
           </div>
         </div>
       )}
@@ -196,19 +207,19 @@ export function ImageUploader() {
       {status === "parsing" && (
         <div className="mt-10 flex flex-col items-center max-w-2xl mx-auto">
           <div className="flex items-center space-x-4 mb-6">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500" />
-            <p className="text-lg text-gray-600">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-hairline border-t-accent" />
+            <p className="text-lg text-muted">
               Processing the ingredient list...
             </p>
           </div>
           <div className="w-full max-w-2xl space-y-4">
-            <div className="h-8 bg-gray-200 rounded-lg animate-pulse" />
+            <div className="h-8 bg-gray-100 rounded-lg animate-pulse" />
             <div className="grid grid-cols-3 gap-4">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="space-y-2">
-                  <div className="h-32 bg-gray-200 rounded-lg animate-pulse" />
-                  <div className="h-4 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-4 w-2/3 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-32 bg-gray-100 rounded-lg animate-pulse" />
+                  <div className="h-4 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-4 w-2/3 bg-gray-100 rounded animate-pulse" />
                 </div>
               ))}
             </div>
@@ -217,39 +228,42 @@ export function ImageUploader() {
       )}
 
       {status === "error" && (
-        <div className="mt-10 flex flex-col items-center max-w-2xl mx-auto space-y-4">
-          <p className="text-lg text-red-600">
-            Oops! Something went wrong. Please try again.
+        <div className="mx-auto mt-10 flex max-w-md flex-col items-center gap-4 rounded-2xl border border-hairline bg-surface p-8 shadow-sm">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
+            <ExclamationTriangleIcon className="h-6 w-6 text-red-500" />
+          </span>
+          <p className="text-base text-ink">
+            Something went wrong reading that image. Please try again.
           </p>
           <button
             onClick={handleReset}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            className="rounded-full bg-accent px-5 py-2.5 font-semibold text-white transition hover:bg-accent-hover"
           >
-            Try Again
+            Try again
           </button>
         </div>
       )}
 
       {parsedIngredient.length > 0 && (
-        <div className="mt-10 max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold mb-5">
+        <div className="mx-auto mt-10 max-w-7xl text-left">
+          <h2 className="mb-5 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             Found {parsedIngredient.length} ingredients
           </h2>
           <ResultSummary items={parsedIngredient} language={language} />
-          <div className="flex gap-4 mb-6">
-          <div className="relative flex-1">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search ingredient items..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+          <div className="mb-8 flex gap-3">
+            <div className="relative flex-1">
+              <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
+              <Input
+                type="text"
+                placeholder="Search ingredients..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-11 rounded-full border-hairline-strong bg-surface pl-11 text-ink shadow-none focus-visible:ring-2 focus-visible:ring-[#34c759]/40"
+              />
+            </div>
+            <FilterDropdown onFilterChange={setSelectedNovaFilters} />
           </div>
-          <FilterDropdown onFilterChange={setSelectedNovaFilters} />
-          </div>
-          <IngredientGrid items={filteredIngredient} />
+          <IngredientGrid items={filteredIngredient} language={language} />
         </div>
       )}
     </div>
