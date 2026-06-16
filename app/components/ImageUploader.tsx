@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { uploadImageToSupabase } from "@/lib/supabase";
+import { compressImage } from "@/lib/image";
 import {
   CameraIcon,
   MagnifyingGlassIcon,
@@ -27,7 +27,7 @@ export interface IngredientItem {
 
 export function ImageUploader() {
   const [status, setStatus] = useState<
-    "initial" | "uploading" | "parsing" | "created" | "error"
+    "initial" | "uploading" | "parsing" | "created" | "error" | "rateLimited"
   >("initial");
   const [ingredientUrl, setIngredientUrl] = useState<string | undefined>(
     undefined,
@@ -42,6 +42,9 @@ export function ImageUploader() {
 
    // Reset function
    const handleReset = () => {
+    if (ingredientUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(ingredientUrl);
+    }
     setStatus("initial");
     setIngredientUrl(undefined);
     setParsedIngredient([]);
@@ -57,21 +60,22 @@ export function ImageUploader() {
       objectUrl = URL.createObjectURL(file);
       setStatus("uploading");
       setIngredientUrl(objectUrl);
-      
-      const publicUrl = await uploadImageToSupabase(file);
-      
-      // Clean up the temporary blob URL
-      URL.revokeObjectURL(objectUrl);
-      setIngredientUrl(publicUrl);
+
+      const compressed = await compressImage(file);
 
       setStatus("parsing");
+      const formData = new FormData();
+      formData.append("image", compressed, "ingredient.jpg");
+
       const res = await fetch("/api/parseIngredient", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ingredientUrl: publicUrl }),
+        body: formData,
       });
+
+      if (res.status === 429) {
+        setStatus("rateLimited");
+        return;
+      }
 
       if (!res.ok) {
         throw new Error("Failed to parse ingredient");
@@ -87,10 +91,12 @@ export function ImageUploader() {
 
       setStatus("created");
       setLanguage(typeof json.language === "string" ? json.language : "en");
-      const normalizedIngredients = json.ingredient.map((item: IngredientItem) => ({
-        ...item,
-        nova_classification: Number(item.nova_classification),
-      }));
+      const normalizedIngredients = json.ingredient.map(
+        (item: IngredientItem) => ({
+          ...item,
+          nova_classification: Number(item.nova_classification),
+        }),
+      );
       setParsedIngredient(normalizedIngredients);
     } catch (error) {
       console.error("Error processing image:", error);
@@ -187,6 +193,7 @@ export function ImageUploader() {
             height={768}
             src={ingredientUrl}
             alt="Scanned ingredient label"
+            unoptimized
             className="w-40 rounded-2xl border border-hairline shadow-sm"
           />
         </div>
@@ -234,6 +241,23 @@ export function ImageUploader() {
           </span>
           <p className="text-base text-ink">
             Something went wrong reading that image. Please try again.
+          </p>
+          <button
+            onClick={handleReset}
+            className="rounded-full bg-accent px-5 py-2.5 font-semibold text-white transition hover:bg-accent-hover"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {status === "rateLimited" && (
+        <div className="mx-auto mt-10 flex max-w-md flex-col items-center gap-4 rounded-2xl border border-hairline bg-surface p-8 shadow-sm">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#34c759]/10">
+            <ExclamationTriangleIcon className="h-6 w-6 text-accent" />
+          </span>
+          <p className="text-base text-ink">
+            Du har nået grænsen for antal scanninger. Prøv igen senere.
           </p>
           <button
             onClick={handleReset}
