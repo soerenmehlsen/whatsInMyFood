@@ -249,7 +249,7 @@ export function ImageUploader() {
           </div>
           <FilterDropdown onFilterChange={setSelectedNovaFilters} />
           </div>
-          <IngredientGrid items={filteredIngredient} />
+          <IngredientGrid items={filteredIngredient} language={language} />
         </div>
       )}
     </div>
