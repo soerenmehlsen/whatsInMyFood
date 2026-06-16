@@ -231,23 +231,23 @@ export function ImageUploader() {
       )}
 
       {parsedIngredient.length > 0 && (
-        <div className="mt-10 max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold mb-5">
+        <div className="mx-auto mt-10 max-w-7xl text-left">
+          <h2 className="mb-5 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             Found {parsedIngredient.length} ingredients
           </h2>
           <ResultSummary items={parsedIngredient} language={language} />
-          <div className="flex gap-4 mb-6">
-          <div className="relative flex-1">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search ingredient items..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <FilterDropdown onFilterChange={setSelectedNovaFilters} />
+          <div className="mb-8 flex gap-3">
+            <div className="relative flex-1">
+              <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
+              <Input
+                type="text"
+                placeholder="Search ingredients..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-11 rounded-full border-hairline-strong bg-surface pl-11 text-ink shadow-none focus-visible:ring-2 focus-visible:ring-[#34c759]/40"
+              />
+            </div>
+            <FilterDropdown onFilterChange={setSelectedNovaFilters} />
           </div>
           <IngredientGrid items={filteredIngredient} language={language} />
         </div>
