@@ -1,5 +1,4 @@
-export const exampleUrl =
-  "https://wqithokpbiyygfmwapcc.supabase.co/storage/v1/object/public/IngredientBucket/images/1770470431756_4006391-ultra.jpg";
+export const exampleUrl = "/example-ingredients.jpg";
 
 export const exampleIngredient = [
   {
