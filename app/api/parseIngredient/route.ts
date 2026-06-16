@@ -1,5 +1,6 @@
 import {GoogleGenerativeAI, SchemaType, type Schema} from "@google/generative-ai";
 import { NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // Initialize the Google AI client
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
@@ -44,13 +45,21 @@ const schema: Schema = {
 
 export async function POST(request: Request) {
   try {
-  const { ingredientUrl } = await request.json();
-
-  console.log({ ingredientUrl });
-
-  if (!ingredientUrl) {
+  const forwarded = request.headers.get("x-forwarded-for");
+  const ip = forwarded?.split(",")[0]?.trim() || "anonymous";
+  const { success: allowed } = await checkRateLimit(ip);
+  if (!allowed) {
     return NextResponse.json(
-      { error: "No ingredient URL provided" },
+      { success: false, error: "rate_limited" },
+      { status: 429 },
+    );
+  }
+
+  const formData = await request.formData();
+  const image = formData.get("image");
+  if (!(image instanceof File)) {
+    return NextResponse.json(
+      { error: "No image provided" },
       { status: 400 },
     );
   }
@@ -88,16 +97,9 @@ Also return a top-level 'language' field: the ISO 639-1 code (e.g. 'da', 'en') o
 
   const outputStartTime = Date.now();
 
-  // Fetch the image data from the provided URL
-  const imageResponse = await fetch(ingredientUrl);
-  if (!imageResponse.ok) {
-    throw new Error(`Failed to fetch image: ${imageResponse.statusText}`);
-  }
-  
-  const imageData = await imageResponse.arrayBuffer();
-
-  // Convert the image data to base64
-  const base64Image = Buffer.from(imageData).toString('base64');
+  // Convert the uploaded image to base64
+  const imageData = await image.arrayBuffer();
+  const base64Image = Buffer.from(imageData).toString("base64");
 
   // Api request to the model
   const result = await model.generateContent([
