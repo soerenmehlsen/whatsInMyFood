@@ -1,16 +1,20 @@
 // Client-side image compression: scales the longest edge down to `maxEdge`
-// and re-encodes as JPEG. Re-encoding also normalizes HEIC/PNG to JPEG.
+// and re-encodes as JPEG. createImageBitmap with imageOrientation "from-image"
+// applies EXIF rotation so phone photos aren't sent sideways (which would hurt
+// OCR). Re-encoding also converts to JPEG where the browser can decode the
+// source (e.g. HEIC on Safari; non-Apple browsers may not decode HEIC).
 export async function compressImage(
   file: File,
   maxEdge = 1600,
   quality = 0.8,
 ): Promise<Blob> {
-  const objectUrl = URL.createObjectURL(file);
+  const bitmap = await createImageBitmap(file, {
+    imageOrientation: "from-image",
+  });
   try {
-    const img = await loadImage(objectUrl);
-    const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
-    const width = Math.round(img.width * scale);
-    const height = Math.round(img.height * scale);
+    const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+    const width = Math.round(bitmap.width * scale);
+    const height = Math.round(bitmap.height * scale);
 
     const canvas = document.createElement("canvas");
     canvas.width = width;
@@ -19,7 +23,7 @@ export async function compressImage(
     if (!ctx) {
       throw new Error("Could not get canvas 2D context");
     }
-    ctx.drawImage(img, 0, 0, width, height);
+    ctx.drawImage(bitmap, 0, 0, width, height);
 
     const blob = await new Promise<Blob | null>((resolve) =>
       canvas.toBlob(resolve, "image/jpeg", quality),
@@ -29,15 +33,6 @@ export async function compressImage(
     }
     return blob;
   } finally {
-    URL.revokeObjectURL(objectUrl);
+    bitmap.close();
   }
-}
-
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Failed to load image"));
-    img.src = src;
-  });
 }

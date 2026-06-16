@@ -45,6 +45,9 @@ const schema: Schema = {
 
 export async function POST(request: Request) {
   try {
+  // Best-effort client identity. x-forwarded-for is client-influenced, so this
+  // is an abuse speed-bump, not a hard guarantee; unknown clients share the
+  // "anonymous" bucket.
   const forwarded = request.headers.get("x-forwarded-for");
   const ip = forwarded?.split(",")[0]?.trim() || "anonymous";
   const { success: allowed } = await checkRateLimit(ip);

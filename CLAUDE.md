@@ -53,7 +53,7 @@ Set in `.env.local`:
 - `NEXT_PUBLIC_SUPABASE_DOMAIN` — whitelisted hostname for Next.js image optimization (`next.config.ts`).
 - `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET` — used by `app/api/keepalive/route.ts`.
 - `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` — PostHog analytics (`app/providers.tsx`).
-- `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — Upstash Redis for rate limiting `/api/parseIngredient` (`lib/rate-limit.ts`). If unset, rate limiting is disabled (dev fallback).
+- `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — Upstash Redis for rate limiting `/api/parseIngredient` (`lib/rate-limit.ts`, 15 requests per IP per 24h sliding window). If unset — or if the Upstash call errors — rate limiting fails open (requests allowed).
 - Clerk keys.
 
 ## Cron / keepalive

@@ -28,8 +28,9 @@ function getRatelimit(): Ratelimit | null {
   return ratelimit;
 }
 
-// Returns { success: true } when the request is allowed. When Upstash is not
-// configured (e.g. local dev), requests are allowed and a warning is logged.
+// Returns { success: true } when the request is allowed. Fails open: when
+// Upstash is not configured (e.g. local dev) or the Upstash call itself errors
+// (network/Redis down), requests are allowed rather than blocking real users.
 export async function checkRateLimit(
   identifier: string,
 ): Promise<{ success: boolean }> {
@@ -37,6 +38,11 @@ export async function checkRateLimit(
   if (!rl) {
     return { success: true };
   }
-  const { success } = await rl.limit(identifier);
-  return { success };
+  try {
+    const { success } = await rl.limit(identifier);
+    return { success };
+  } catch (err) {
+    console.error("[rate-limit] Upstash error; allowing request.", err);
+    return { success: true };
+  }
 }
