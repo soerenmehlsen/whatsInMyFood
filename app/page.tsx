@@ -22,7 +22,7 @@ export default async function Home() {
         <section className="relative mx-auto mt-24 max-w-4xl overflow-hidden rounded-3xl border border-[#34c759]/20 bg-gradient-to-br from-[#34c759]/8 to-[#34c759]/4 px-6 py-16 sm:mt-36 sm:py-20">
           <div
             aria-hidden
-            className="pointer-events-none absolute left-1/2 top-0 h-64 w-[420px] -translate-x-1/2 rounded-full bg-[#34c759]/20 blur-[100px]"
+            className="pointer-events-none absolute left-1/2 top-0 h-64 w-[420px] -translate-x-1/2 rounded-full blur-[100px]"
           />
           <h2 className="relative text-balance text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             Ready to see what&apos;s in your food?

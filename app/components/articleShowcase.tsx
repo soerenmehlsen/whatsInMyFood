@@ -65,7 +65,7 @@ export default function ArticleShowcase() {
             <div className="mt-8 flex items-center justify-center gap-5">
                 <button
                     onClick={prev}
-                    className="flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 shadow-sm transition-all duration-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-md active:scale-95"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 shadow-sm transition-all duration-200 hover:border-green-300 hover:text-green-600 hover:shadow-md active:scale-95"
                     aria-label="Previous slide"
                 >
                     <ChevronLeft className="h-5 w-5" />
@@ -80,7 +80,7 @@ export default function ArticleShowcase() {
                             aria-current={index === current}
                             className={`h-2 rounded-full transition-all duration-300 ${
                                 index === current
-                                    ? 'w-6 bg-blue-500'
+                                    ? 'w-6 bg-green-500'
                                     : 'w-2 bg-zinc-300 hover:bg-zinc-400'
                             }`}
                         />
@@ -89,7 +89,7 @@ export default function ArticleShowcase() {
 
                 <button
                     onClick={next}
-                    className="flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 shadow-sm transition-all duration-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-md active:scale-95"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 shadow-sm transition-all duration-200 hover:border-green-300 hover:text-green-600 hover:shadow-md active:scale-95"
                     aria-label="Next slide"
                 >
                     <ChevronRight className="h-5 w-5" />

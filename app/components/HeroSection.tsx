@@ -16,7 +16,7 @@ const HeroSection = () => {
             {/* Background atmosphere */}
             <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
                 <div className="hero-grid absolute inset-x-0 top-0 h-[620px]" />
-                <div className="absolute left-1/2 top-[-140px] h-[420px] w-[680px] -translate-x-1/2 rounded-full bg-[#34c759]/20 blur-[130px]" />
+                <div className="absolute left-1/2 top-[-140px] h-[420px] w-[680px] -translate-x-1/2 rounded-full " />
             </div>
 
             <div className="mx-auto max-w-3xl px-4">
@@ -81,7 +81,7 @@ const HeroSection = () => {
             <div className="relative mt-14 flex justify-center sm:mt-20">
                 <div
                     aria-hidden
-                    className="absolute left-1/2 top-12 -z-10 h-[55%] w-[80%] max-w-4xl -translate-x-1/2 rounded-[40%] bg-[#34c759]/20 blur-[110px]"
+                    className="absolute left-1/2 top-12 -z-10 h-[55%] w-[80%] max-w-4xl -translate-x-1/2 rounded-[40%] blur-[110px]"
                 />
                 <Fade delay={850} direction="up">
                     <ResponsiveImage />
