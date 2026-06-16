@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WhatsInMyFood is a Next.js 16 (App Router) app that analyzes food ingredient labels. A user uploads a photo of an ingredient list, the image is stored in Supabase, and Google's Gemini model extracts each ingredient with a description, a NOVA processing-level classification (groups 1–4), and a reason for that classification.
+WhatsInMyFood is a Next.js 16 (App Router) app that analyzes food ingredient labels. A user uploads a photo of an ingredient list, the image is compressed in the browser and sent directly to Google's Gemini model, which extracts each ingredient with a description, a NOVA processing-level classification (groups 1–4), and a reason for that classification. Images are not persisted.
 
 ## Commands
 
@@ -20,10 +20,9 @@ No test framework is configured.
 ## Architecture
 
 ### Request flow (the core of the app)
-1. `app/components/ImageUploader.tsx` is the main client component. It owns the whole flow and tracks status as `"initial" | "uploading" | "parsing" | "created" | "error"`.
-2. On upload the client compresses the image (`lib/image.ts`) and POSTs it as multipart form-data; Supabase is no longer part of the parse flow (still used only by `/api/keepalive`).
-3. That public URL is POSTed to `app/api/parseIngredient/route.ts` as `{ ingredientUrl }`.
-4. The route fetches the image, base64-encodes it, and sends it to Gemini with a fixed JSON `responseSchema` (`name`, `description`, `nova_classification`, `reason`). It returns `{ success, ingredient: IngredientItem[] }`. `maxDuration = 60`.
+1. `app/components/ImageUploader.tsx` is the main client component. It owns the whole flow and tracks status as `"initial" | "uploading" | "parsing" | "created" | "error" | "rateLimited"`.
+2. On upload the client compresses/re-encodes the image to JPEG (`lib/image.ts`) and POSTs it as `multipart/form-data` (an `image` field) to `app/api/parseIngredient/route.ts`. Supabase is no longer part of the parse flow (still used only by `/api/keepalive`).
+3. The route first rate-limits by IP (`lib/rate-limit.ts`, Upstash) and returns `429` if exceeded; otherwise it reads the uploaded file from `formData`, base64-encodes it, and sends it to Gemini with a fixed JSON `responseSchema` (`name`, `description`, `nova_classification`, `reason`). It returns `{ success, ingredient: IngredientItem[], language }`. `maxDuration = 60`.
 5. Results render in `app/components/ingredient-grid.tsx` with client-side search and NOVA filtering (`app/components/FilterDropdown.tsx`).
 
 The Gemini system prompt (in the route) drives two important behaviors: it splits compound E-number entries into one entry per E-number (e.g. "Smagsforstærker (E621, E635)" → separate `E621`, `E635` entries), and it returns descriptions/reasons in the same language as the detected ingredient name.
@@ -50,7 +49,7 @@ The existing `AGENTS.md` and `README.md` are partially stale. Trust the code:
 
 Set in `.env.local`:
 - `GOOGLE_API_KEY` — Gemini API key.
-- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_KEY` — Supabase client (used in `lib/supabase.ts`).
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_KEY` — Supabase client config. No longer used by the parse flow (the client `lib/supabase.ts` was removed); kept for `next.config.ts` image config and any future Supabase use.
 - `NEXT_PUBLIC_SUPABASE_DOMAIN` — whitelisted hostname for Next.js image optimization (`next.config.ts`).
 - `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET` — used by `app/api/keepalive/route.ts`.
 - `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` — PostHog analytics (`app/providers.tsx`).
