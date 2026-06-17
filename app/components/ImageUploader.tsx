@@ -340,7 +340,7 @@ export function ImageUploader() {
             <ExclamationTriangleIcon className="h-6 w-6 text-red-500" />
           </span>
           <p className="text-base text-ink">
-            Something went wrong reading that image. Please try again.
+            Something went wrong. Please try again.
           </p>
           <button
             onClick={handleReset}
@@ -357,7 +357,7 @@ export function ImageUploader() {
             <ExclamationTriangleIcon className="h-6 w-6 text-accent" />
           </span>
           <p className="text-base text-ink">
-            Du har nået grænsen for antal scanninger. Prøv igen senere.
+            You&apos;ve reached the scan limit. Please try again later.
           </p>
           <button
             onClick={handleReset}
