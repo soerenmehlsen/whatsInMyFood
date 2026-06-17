@@ -1,6 +1,7 @@
 import {GoogleGenerativeAI, SchemaType, type Schema} from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getFixedLanguage } from "@/lib/languages";
 
 // Initialize the Google AI client
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
@@ -72,6 +73,11 @@ export async function POST(request: Request) {
   const ingredientText =
     typeof textInput === "string" ? textInput.trim() : "";
 
+  const targetLangInput = formData.get("targetLang");
+  const requestedLang = getFixedLanguage(
+    typeof targetLangInput === "string" ? targetLangInput : undefined,
+  );
+
   const hasImage = image instanceof File;
   const hasText = ingredientText.length > 0;
 
@@ -113,6 +119,11 @@ NOVA Classification Groups:
 
 Also return a top-level 'language' field: the ISO 639-1 code (e.g. 'da', 'en') of the language used by the ingredient names. Put every ingredient in the 'ingredient' array.`;
 
+  const languageInstruction = requestedLang
+    ? `\n\nIMPORTANT LANGUAGE OVERRIDE: Output every field — ingredient names, descriptions, and reasons — in ${requestedLang.promptName} (${requestedLang.code}), regardless of the label's original language. Translate ingredient names into ${requestedLang.promptName} as well.`
+    : "";
+  const fullPrompt = systemPrompt + languageInstruction;
+
   const outputStartTime = Date.now();
 
   // The prompt is written for image input; for already-extracted text we prepend a
@@ -123,7 +134,7 @@ Also return a top-level 'language' field: the ISO 639-1 code (e.g. 'da', 'en') o
 
   const parts = hasImage
     ? [
-        { text: systemPrompt },
+        { text: fullPrompt },
         {
           inlineData: {
             mimeType: "image/jpeg",
@@ -131,7 +142,7 @@ Also return a top-level 'language' field: the ISO 639-1 code (e.g. 'da', 'en') o
           },
         },
       ]
-    : [{ text: systemPrompt }, { text: textPreamble + ingredientText }];
+    : [{ text: fullPrompt }, { text: textPreamble + ingredientText }];
 
   // Api request to the model
   const result = await model.generateContent(parts);
@@ -156,7 +167,11 @@ Also return a top-level 'language' field: the ISO 639-1 code (e.g. 'da', 'en') o
   return NextResponse.json({
     success: true,
     ingredient: parsed.ingredient,
-    language: typeof parsed.language === "string" ? parsed.language : "en",
+    language: requestedLang
+      ? requestedLang.code
+      : typeof parsed.language === "string"
+        ? parsed.language
+        : "en",
   });
 
 } catch (error) {
