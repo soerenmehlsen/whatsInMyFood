@@ -81,15 +81,19 @@ export function IngredientGrid({ items, language }: IngredientGridProps) {
                         opacity: expandItem === item.name ? 1 : 0.7,
                       }}
                       className={`text-sm text-muted ${
-                        expandItem === item.name
-                          ? "line-clamp-none"
-                          : "line-clamp-2"
+                        expandItem === item.name ? "" : "line-clamp-2"
                       }`}
                     >
                       {item.description}
-                      <br />
-                      <span className="font-semibold text-ink">Process: </span>
-                      {item.reason}
+                      {expandItem === item.name && (
+                        <>
+                          <br />
+                          <span className="font-semibold text-ink">
+                            {t.processLabel}:{" "}
+                          </span>
+                          {item.reason}
+                        </>
+                      )}
                     </motion.p>
                   </div>
                 </div>

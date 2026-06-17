@@ -13,6 +13,8 @@ export interface NovaStrings {
   additiveSuffix: (n: number) => string;
   // Chip text, e.g. "14 ultra-processed".
   chipLabel: (count: number, groupNoun: string) => string;
+  // Inline label before the NOVA reason on an ingredient card.
+  processLabel: string;
 }
 
 const en: NovaStrings = {
@@ -38,6 +40,7 @@ const en: NovaStrings = {
   additiveSuffix: (n) =>
     `Includes ${n} ${n === 1 ? "additive" : "additives"} (E-numbers).`,
   chipLabel: (count, noun) => `${count} ${noun}`,
+  processLabel: "Process",
 };
 
 const da: NovaStrings = {
@@ -63,6 +66,7 @@ const da: NovaStrings = {
   additiveSuffix: (n) =>
     `Heraf ${n} ${n === 1 ? "tilsætningsstof" : "tilsætningsstoffer"} (E-numre).`,
   chipLabel: (count, noun) => `${count} ${noun}`,
+  processLabel: "Forarbejdning",
 };
 
 const dictionaries: Record<string, NovaStrings> = { en, da };

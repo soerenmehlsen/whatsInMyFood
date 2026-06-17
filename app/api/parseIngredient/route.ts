@@ -107,7 +107,7 @@ export async function POST(request: Request) {
 4. Exclude duplicate descriptions and ensure clarity.
 5. Exclude duplicate ingredient names.
   
-You have to provide formative descriptions that is clear and concise for each ingredient. 
+Write each description in plain, everyday language a non-expert can understand — no chemistry jargon. In 1–2 short sentences, explain what the ingredient is and why it is in the food (e.g. to preserve, colour, sweeten, or thicken it).
 For the field 'nova_classification', return only the group number (1, 2, 3, or 4) as a number, not the description or any text. 
 Use the NOVA groups to justify the classification with a reason in the same language as the ingredient name and description.
 
