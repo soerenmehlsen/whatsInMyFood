@@ -5,13 +5,13 @@ const HowItWorks = () => {
     const steps = [
         {
             number: 1,
-            title: "Take a picture",
-            description: "Take a picture of your food's ingredient list.",
+            title: "Scan or snap",
+            description: "Scan a product's barcode, or take a picture of the ingredient list.",
         },
         {
             number: 2,
-            title: "Process the image",
-            description: "The image will now be scanned for ingredients with AI.",
+            title: "Let AI read it",
+            description: "We pull the ingredients and analyze each one with AI.",
         },
         {
             number: 3,
@@ -32,7 +32,7 @@ const HowItWorks = () => {
                 <h2 className="mt-6 text-balance text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl">
                     Three steps to{" "}
                     <span className="bg-gradient-to-r from-[#1a8f3c] to-[#34c759] bg-clip-text text-transparent">
-                        cleaner choices
+                        better choices
                     </span>
                 </h2>
 

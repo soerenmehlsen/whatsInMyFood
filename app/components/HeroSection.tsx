@@ -47,8 +47,8 @@ const HeroSection = () => {
                 {/* Subhead */}
                 <Fade delay={550} direction="up">
                     <p className="mx-auto mt-6 max-w-2xl text-balance text-lg leading-relaxed text-muted">
-                        Take a picture of your food&apos;s ingredient list and let AI break down
-                        each ingredient — so you always know exactly what you&apos;re eating.
+                        Scan a product&apos;s barcode or snap a photo of the ingredient list, and let AI
+                        break down each ingredient — so you always know exactly what you&apos;re eating.
                     </p>
                 </Fade>
 

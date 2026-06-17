@@ -28,7 +28,7 @@ export default async function Home() {
             Ready to see what&apos;s in your food?
           </h2>
           <p className="relative mx-auto mt-4 max-w-xl text-balance text-lg text-muted">
-            Snap a photo and get an instant, AI-powered ingredient breakdown — completely free.
+            Scan a barcode or snap a photo and get an instant, AI-powered ingredient breakdown — completely free.
           </p>
           <div className="relative mt-8 flex justify-center">
             <TryNow buttonText="Get Started" />

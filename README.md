@@ -1,10 +1,10 @@
 # WhatsInMyFood
 
-Ever wondered what those mysterious ingredients on food labels actually mean? WhatsInMyFood transforms confusing ingredient lists into clear, understandable information. Simply scan a photo of the label, and AI analyzes each ingredient's purpose and processing level using the NOVA classification system.
+Ever wondered what those mysterious ingredients on food labels actually mean? WhatsInMyFood transforms confusing ingredient lists into clear, understandable information. Scan a product's barcode or snap a photo of the label, and AI analyzes each ingredient's purpose and processing level using the NOVA classification system.
 
 ## 📋 Description
 
-WhatsInMyFood is a web application that uses AI to analyze food ingredient lists. Users scan a photo of an ingredient label, and the app uses Google's Gemini AI to extract, describe, and classify each ingredient. The system helps consumers make informed dietary choices by providing clear, user-friendly explanations of each ingredient and its processing level. Images are processed in-memory and sent directly to the AI — they are never stored.
+WhatsInMyFood is a web application that uses AI to analyze food ingredient lists. Users either scan a product barcode — ingredients are pulled from the [Open Food Facts](https://world.openfoodfacts.org/) database — or take a photo of an ingredient label. Either way, Google's Gemini AI extracts, describes, and classifies each ingredient. The system helps consumers make informed dietary choices by providing clear, user-friendly explanations of each ingredient and its processing level. Images are processed in-memory and sent directly to the AI — they are never stored.
 
 ## 💡 Benefits
 
@@ -18,12 +18,20 @@ WhatsInMyFood is a web application that uses AI to analyze food ingredient lists
 
 ## ✨ Features
 
-### 📸 Camera Scan & Analysis
+### 📷 Barcode Scan
+- Scan a product's EAN/UPC barcode live with your device camera (`@zxing/browser`)
+- Ingredients are looked up from the [Open Food Facts](https://world.openfoodfacts.org/) database (free, no API key)
+- Falls back to the photo flow when a barcode isn't found or has no ingredient text
+
+### 📸 Photo Scan & Analysis
 - Scan ingredient labels directly with your device camera
 - Images are compressed client-side before upload (faster, cheaper, and normalizes phone formats like HEIC to JPEG)
 - Instant AI-powered extraction of ingredients from the photo
-- Automatic language detection — descriptions are returned in the label's language
 - Built-in example image for testing without a camera
+
+### 🌐 Language
+- Automatic language detection — descriptions are returned in the label's language
+- Optional language selector to force results into your preferred language before scanning
 
 ### 🔍 Ingredient Analysis
 - Detailed description of each ingredient in clear, user-friendly language
@@ -55,6 +63,7 @@ WhatsInMyFood is a web application that uses AI to analyze food ingredient lists
 - **Runtime:** Node.js 20+
 - **API Routes:** Next.js Route Handlers
 - **AI/ML:** [Google Generative AI](https://ai.google.dev/) (Gemini 3 Flash)
+- **Barcode scanning:** [@zxing/browser](https://github.com/zxing-js/browser) (EAN-13/8, UPC-A/E), with product lookup via [Open Food Facts](https://world.openfoodfacts.org/) (client-side, no API key)
 - **Image handling:** Client-side canvas compression; images are sent to the API as multipart form-data and forwarded to Gemini — never persisted
 - **Rate limiting:** [Upstash Redis](https://upstash.com/) via `@upstash/ratelimit` (per-IP, fails open when unconfigured)
 - **Auth:** [Clerk](https://clerk.com/) is installed and wraps the app; the dashboard auth gate is currently disabled (routes are not enforced)
@@ -134,8 +143,10 @@ whatsInMyFood/
 │   ├── components/            # React components
 │   │   ├── HeroSection.tsx
 │   │   ├── HowItWorks.tsx
-│   │   ├── ImageUploader.tsx  # Owns the scan → parse → results flow
+│   │   ├── ImageUploader.tsx  # Owns the barcode/photo → parse → results flow
+│   │   ├── BarcodeScanner.tsx # Live EAN/UPC barcode scanning (zxing)
 │   │   ├── CameraModal.tsx    # Live camera capture
+│   │   ├── LanguageSelect.tsx # Result-language selector
 │   │   ├── ingredient-grid.tsx
 │   │   ├── ResultSummary.tsx
 │   │   ├── FilterDropdown.tsx
@@ -149,7 +160,9 @@ whatsInMyFood/
 │   ├── rate-limit.ts          # Upstash-backed per-IP rate limiting
 │   ├── nova.ts                # NOVA classification helpers
 │   ├── verdict.ts             # Result summary logic
+│   ├── openfoodfacts.ts       # Open Food Facts product lookup by barcode
 │   ├── i18n.ts                # Localized UI strings
+│   ├── languages.ts           # Supported result languages
 │   ├── utils.ts               # cn() class-name helper
 │   └── consant.ts             # Example ingredient data (note: filename is misspelled)
 ├── public/                    # Static assets
@@ -217,6 +230,8 @@ WhatsInMyFood is a Progressive Web App (PWA) that can be installed on mobile dev
 - ✅ Detailed ingredient descriptions
 - ✅ E-number breakdown and analysis
 - ✅ Visual processing level indicators
+- ✅ Barcode scanning with Open Food Facts lookup
+- ✅ Result language selection
 
 ### Upcoming Features
 - [ ] Health risk analysis of ingredients
