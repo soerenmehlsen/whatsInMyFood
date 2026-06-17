@@ -67,8 +67,13 @@ export default function BarcodeScanner({
     return () => {
       stopped = true;
       controls?.stop();
+      const stream = videoRef.current?.srcObject as MediaStream | null;
+      stream?.getTracks().forEach((track) => track.stop());
     };
-  }, [onDetect]);
+    // onDetect is only invoked once and guarded by detectedRef; an empty dep
+    // array keeps the camera from restarting when the parent re-renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
