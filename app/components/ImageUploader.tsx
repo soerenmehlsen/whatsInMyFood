@@ -10,6 +10,8 @@ import {
 } from "@heroicons/react/20/solid";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence } from "framer-motion";
+import BarcodeScanner from "./BarcodeScanner";
+import { lookupProduct } from "@/lib/openfoodfacts";
 import CameraModal from "./CameraModal";
 import { Input } from "./ui/input";
 import { IngredientGrid } from "./ingredient-grid";
@@ -27,8 +29,16 @@ export interface IngredientItem {
 
 export function ImageUploader() {
   const [status, setStatus] = useState<
-    "initial" | "uploading" | "parsing" | "created" | "error" | "rateLimited"
+    | "initial"
+    | "lookingUp"
+    | "uploading"
+    | "parsing"
+    | "created"
+    | "error"
+    | "rateLimited"
   >("initial");
+  const [showScanner, setShowScanner] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const [ingredientUrl, setIngredientUrl] = useState<string | undefined>(
     undefined,
   );
@@ -51,7 +61,35 @@ export function ImageUploader() {
     setSearchTerm("");
     setSelectedNovaFilters([]);
     setShowCamera(false);
+    setShowScanner(false);
+    setNotice(null);
     setLanguage("en");
+  };
+
+  // Shared handling for /api/parseIngredient responses (image and text paths).
+  const applyParseResponse = async (res: Response) => {
+    if (res.status === 429) {
+      setStatus("rateLimited");
+      return;
+    }
+    if (!res.ok) {
+      throw new Error("Failed to parse ingredient");
+    }
+    const json = await res.json();
+    if (!json.ingredient || !Array.isArray(json.ingredient)) {
+      throw new Error(
+        "Unexpected response structure: 'ingredient' is not an array",
+      );
+    }
+    setStatus("created");
+    setLanguage(typeof json.language === "string" ? json.language : "en");
+    const normalizedIngredients = json.ingredient.map(
+      (item: IngredientItem) => ({
+        ...item,
+        nova_classification: Number(item.nova_classification),
+      }),
+    );
+    setParsedIngredient(normalizedIngredients);
   };
 
   const handleFileChange = async (file: File) => {
@@ -72,32 +110,7 @@ export function ImageUploader() {
         body: formData,
       });
 
-      if (res.status === 429) {
-        setStatus("rateLimited");
-        return;
-      }
-
-      if (!res.ok) {
-        throw new Error("Failed to parse ingredient");
-      }
-
-      const json = await res.json();
-
-      if (!json.ingredient || !Array.isArray(json.ingredient)) {
-        throw new Error(
-          "Unexpected response structure: 'ingredient' is not an array",
-        );
-      }
-
-      setStatus("created");
-      setLanguage(typeof json.language === "string" ? json.language : "en");
-      const normalizedIngredients = json.ingredient.map(
-        (item: IngredientItem) => ({
-          ...item,
-          nova_classification: Number(item.nova_classification),
-        }),
-      );
-      setParsedIngredient(normalizedIngredients);
+      await applyParseResponse(res);
     } catch (error) {
       console.error("Error processing image:", error);
       setStatus("error");
@@ -105,6 +118,36 @@ export function ImageUploader() {
         URL.revokeObjectURL(objectUrl);
       }
       setIngredientUrl(undefined);
+    }
+  };
+
+  const handleBarcode = async (ean: string) => {
+    setShowScanner(false);
+    setNotice(null);
+    setStatus("lookingUp");
+    try {
+      const result = await lookupProduct(ean);
+      if (!result.found || !result.ingredientsText) {
+        // Miss: no dead end — drop to the photo flow.
+        setStatus("initial");
+        setNotice(
+          "Couldn't find that product. Scan the ingredient list instead.",
+        );
+        setShowCamera(true);
+        return;
+      }
+
+      setStatus("parsing");
+      const formData = new FormData();
+      formData.append("text", result.ingredientsText);
+      const res = await fetch("/api/parseIngredient", {
+        method: "POST",
+        body: formData,
+      });
+      await applyParseResponse(res);
+    } catch (error) {
+      console.error("Error looking up barcode:", error);
+      setStatus("error");
     }
   };
 
@@ -136,19 +179,27 @@ export function ImageUploader() {
       {status === "initial" && (
         <>
         <div className="mx-auto max-w-xl">
+          {notice && (
+            <p className="mb-4 rounded-lg bg-[#34c759]/10 px-4 py-3 text-sm text-ink">
+              {notice}
+            </p>
+          )}
           <Fade direction="up" delay={300}>
             <button
-              onClick={() => setShowCamera(true)}
+              onClick={() => {
+                setNotice(null);
+                setShowScanner(true);
+              }}
               className="group mt-2 flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-hairline-strong bg-surface transition hover:border-accent"
             >
               <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#34c759]/10 transition group-hover:bg-[#34c759]/15">
                 <CameraIcon className="h-7 w-7 text-accent" aria-hidden="true" />
               </span>
               <p className="mt-4 text-xl font-semibold tracking-tight text-ink">
-                Scan your ingredient list
+                Scan a barcode
               </p>
               <p className="mt-1 text-sm text-muted">
-                Take a photo and let AI break it down
+                Fastest way — we look it up instantly
               </p>
             </button>
           </Fade>
@@ -156,12 +207,18 @@ export function ImageUploader() {
           <div className="mt-6 flex flex-col items-center gap-3">
             <Fade direction="up" delay={400}>
               <button
-                onClick={handleExampleImage}
+                onClick={() => setShowCamera(true)}
                 className="text-sm font-semibold text-accent-fg transition hover:underline"
               >
-                Need an example image? Try here →
+                No barcode? Scan the ingredient list →
               </button>
             </Fade>
+            <button
+              onClick={handleExampleImage}
+              className="text-sm font-semibold text-accent-fg transition hover:underline"
+            >
+              Need an example image? Try here →
+            </button>
             <p className="text-xs text-muted">Free · No sign-up needed</p>
           </div>
         </div>
@@ -172,6 +229,18 @@ export function ImageUploader() {
                 onCapture={(file) => {
                   setShowCamera(false);
                   handleFileChange(file);
+                }}
+              />
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {showScanner && (
+              <BarcodeScanner
+                onDetect={handleBarcode}
+                onClose={() => setShowScanner(false)}
+                onUsePhotoInstead={() => {
+                  setShowScanner(false);
+                  setShowCamera(true);
                 }}
               />
             )}
@@ -196,6 +265,15 @@ export function ImageUploader() {
             unoptimized
             className="w-40 rounded-2xl border border-hairline shadow-sm"
           />
+        </div>
+      )}
+
+      {status === "lookingUp" && (
+        <div className="mt-10 flex flex-col items-center max-w-2xl mx-auto">
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-hairline border-t-accent" />
+            <p className="text-lg text-muted">Looking up the product...</p>
+          </div>
         </div>
       )}
 
@@ -270,9 +348,19 @@ export function ImageUploader() {
 
       {parsedIngredient.length > 0 && (
         <div className="mx-auto mt-10 max-w-7xl text-left">
-          <h2 className="mb-5 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-            Found {parsedIngredient.length} ingredients
-          </h2>
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+              Found {parsedIngredient.length} ingredients
+            </h2>
+            {!ingredientUrl && (
+              <button
+                onClick={handleReset}
+                className="inline-flex shrink-0 items-center gap-2 rounded-full border border-hairline-strong bg-surface px-4 py-2 text-sm font-medium text-ink transition hover:border-muted"
+              >
+                Scan again
+              </button>
+            )}
+          </div>
           <ResultSummary items={parsedIngredient} language={language} />
           <div className="mb-8 flex gap-3">
             <div className="relative flex-1">
