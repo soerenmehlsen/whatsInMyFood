@@ -7,7 +7,9 @@ import { BrowserMultiFormatReader } from "@zxing/browser";
 import {
   DecodeHintType,
   BarcodeFormat,
+  NotFoundException,
   type Result,
+  type Exception,
 } from "@zxing/library";
 
 interface BarcodeScannerProps {
@@ -24,6 +26,19 @@ hints.set(DecodeHintType.POSSIBLE_FORMATS, [
   BarcodeFormat.UPC_A,
   BarcodeFormat.UPC_E,
 ]);
+// TRY_HARDER lets zxing do a more thorough (rotation-aware) scan. Without it,
+// handheld 1-D barcodes on a live phone feed are frequently never decoded.
+hints.set(DecodeHintType.TRY_HARDER, true);
+
+// Request a sharp, high-resolution rear camera. Default constraints often yield
+// a soft/low-res stream where the bars aren't crisp enough to decode.
+const cameraConstraints: MediaStreamConstraints = {
+  video: {
+    facingMode: { ideal: "environment" },
+    width: { ideal: 1920 },
+    height: { ideal: 1080 },
+  },
+};
 
 export default function BarcodeScanner({
   onDetect,
@@ -42,13 +57,20 @@ export default function BarcodeScanner({
     const start = async () => {
       try {
         controls = await reader.decodeFromConstraints(
-          { video: { facingMode: "environment" } },
+          cameraConstraints,
           videoRef.current!,
-          (result: Result | undefined) => {
+          (result: Result | undefined, err?: Exception) => {
             if (result && !detectedRef.current) {
               detectedRef.current = true;
               controls?.stop();
               onDetect(result.getText());
+              return;
+            }
+            // NotFoundException fires on every empty frame — that's normal.
+            // Anything else means the decode loop hit an unexpected error
+            // (and zxing stops scanning), so surface it for diagnosis.
+            if (err && !(err instanceof NotFoundException)) {
+              console.warn("Barcode decode error:", err);
             }
           },
         );
