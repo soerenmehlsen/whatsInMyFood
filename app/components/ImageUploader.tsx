@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { compressImage } from "@/lib/image";
 import {
   CameraIcon,
@@ -18,7 +18,9 @@ import { IngredientGrid } from "./ingredient-grid";
 import { ResultSummary } from "./ResultSummary";
 import { Fade } from "./ui/fade";
 import { exampleUrl, exampleIngredient } from "@/lib/consant";
-import FilterDropdown from "./FilterDropdown";  
+import FilterDropdown from "./FilterDropdown";
+import LanguageSelect from "./LanguageSelect";
+import { DEFAULT_LANGUAGE } from "@/lib/languages";
 
 export interface IngredientItem {
   name: string;
@@ -49,6 +51,18 @@ export function ImageUploader() {
   const [selectedNovaFilters, setSelectedNovaFilters] = useState<number[]>([]);
   const [showCamera, setShowCamera] = useState(false);
   const [language, setLanguage] = useState<string>("en");
+  const [targetLang, setTargetLang] = useState<string>(DEFAULT_LANGUAGE);
+
+  // Restore the saved preference after mount (localStorage is client-only).
+  useEffect(() => {
+    const saved = window.localStorage.getItem("wimf:targetLang");
+    if (saved) setTargetLang(saved);
+  }, []);
+
+  // Persist the preference whenever it changes.
+  useEffect(() => {
+    window.localStorage.setItem("wimf:targetLang", targetLang);
+  }, [targetLang]);
 
    // Reset function
    const handleReset = () => {
@@ -104,6 +118,7 @@ export function ImageUploader() {
       setStatus("parsing");
       const formData = new FormData();
       formData.append("image", compressed, "ingredient.jpg");
+      formData.append("targetLang", targetLang);
 
       const res = await fetch("/api/parseIngredient", {
         method: "POST",
@@ -140,6 +155,7 @@ export function ImageUploader() {
       setStatus("parsing");
       const formData = new FormData();
       formData.append("text", result.ingredientsText);
+      formData.append("targetLang", targetLang);
       const res = await fetch("/api/parseIngredient", {
         method: "POST",
         body: formData,
@@ -220,6 +236,11 @@ export function ImageUploader() {
               Need an example image? Try here →
             </button>
             <p className="text-xs text-muted">Free · No sign-up needed</p>
+            <LanguageSelect
+              value={targetLang}
+              onChange={setTargetLang}
+              className="mt-1"
+            />
           </div>
         </div>
           <AnimatePresence>
