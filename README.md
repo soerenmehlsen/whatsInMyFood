@@ -1,34 +1,35 @@
 # WhatsInMyFood
 
-Ever wondered what those mysterious ingredients on food labels actually mean? WhatsInMyFood transforms confusing ingredient lists into clear, understandable information. Simply snap a photo, and AI analyzes each ingredient's purpose and processing level using the NOVA classification system.
+Ever wondered what those mysterious ingredients on food labels actually mean? WhatsInMyFood transforms confusing ingredient lists into clear, understandable information. Simply scan a photo of the label, and AI analyzes each ingredient's purpose and processing level using the NOVA classification system.
 
 ## 📋 Description
 
-WhatsInMyFood is a web application that uses AI to analyze food ingredient lists. Users can upload photos of ingredient labels, and the app uses Google's Gemini AI to extract, describe, and classify ingredients. The system helps consumers make informed dietary choices by providing clear, user-friendly explanations of each ingredient and its processing level.
+WhatsInMyFood is a web application that uses AI to analyze food ingredient lists. Users scan a photo of an ingredient label, and the app uses Google's Gemini AI to extract, describe, and classify each ingredient. The system helps consumers make informed dietary choices by providing clear, user-friendly explanations of each ingredient and its processing level. Images are processed in-memory and sent directly to the AI — they are never stored.
 
 ## 💡 Benefits
 
 ### For Health-Conscious Consumers
 - **Make Informed Choices** - Understand exactly what's in your food before you eat it
 - **Identify Processing Levels** - Know which ingredients are natural and which are ultra-processed
-- **Easy to Use** - Simple photo upload, instant results
+- **Easy to Use** - Snap a photo, get instant results
 - **Mobile Friendly** - Scan ingredients while shopping at the grocery store
-- **Health Goals** - Support your journey toward less processed, more natural foods
-- **Free Access** - No subscription required to start understanding your food
+- **Privacy-First** - Photos are not stored anywhere; they are analyzed and discarded
+- **Free Access** - No sign-up required to start understanding your food
 
 ## ✨ Features
 
-### 📸 Image Upload & Analysis
-- Upload photos of ingredient lists via drag-and-drop or file selection
-- Instant AI-powered extraction of ingredients from images
-- Support for multiple languages in ingredient detection
-- Example images available for testing
+### 📸 Camera Scan & Analysis
+- Scan ingredient labels directly with your device camera
+- Images are compressed client-side before upload (faster, cheaper, and normalizes phone formats like HEIC to JPEG)
+- Instant AI-powered extraction of ingredients from the photo
+- Automatic language detection — descriptions are returned in the label's language
+- Built-in example image for testing without a camera
 
 ### 🔍 Ingredient Analysis
 - Detailed description of each ingredient in clear, user-friendly language
 - NOVA classification system for processing level assessment
 - Explanation of why each ingredient is classified at its level
-- Special handling of E-numbers with comprehensive breakdowns
+- Special handling of E-numbers with comprehensive breakdowns (compound entries are split into one per E-number)
 
 ### 🎯 Filtering
 - Filter ingredients by NOVA classification group
@@ -44,7 +45,7 @@ WhatsInMyFood is a web application that uses AI to analyze food ingredient lists
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **Framework:** [Next.js 15](https://nextjs.org/) with App Router
+- **Framework:** [Next.js 16](https://nextjs.org/) with App Router
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 - **Animations:** [Framer Motion](https://www.framer.com/motion/), React Awesome Reveal
 - **Icons:** [Heroicons](https://heroicons.com/)
@@ -52,19 +53,19 @@ WhatsInMyFood is a web application that uses AI to analyze food ingredient lists
 
 ### Backend & AI
 - **Runtime:** Node.js 20+
-- **API Routes:** Next.js API Routes
+- **API Routes:** Next.js Route Handlers
 - **AI/ML:** [Google Generative AI](https://ai.google.dev/) (Gemini 3 Flash)
-- **Storage:** [Supabase](https://supabase.com/) (image storage)
-- **Image Processing:** Next.js Image Optimization
+- **Image handling:** Client-side canvas compression; images are sent to the API as multipart form-data and forwarded to Gemini — never persisted
+- **Rate limiting:** [Upstash Redis](https://upstash.com/) via `@upstash/ratelimit` (per-IP, fails open when unconfigured)
+- **Auth:** [Clerk](https://clerk.com/) is installed and wraps the app; the dashboard auth gate is currently disabled (routes are not enforced)
 
 ### Analytics & Monitoring
 - **User Analytics:** [PostHog](https://posthog.com/)
-- **Web Analytics:** Google Analytics
+- **Web Analytics:** Google Analytics (`@next/third-parties`)
 - **Performance:** Vercel Speed Insights
 
 ### Tools
 - **Hosting:** [Vercel](https://vercel.com/)
-- **File Upload:** react-dropzone
 - **Linting:** ESLint
 
 ## 🚀 Getting Started
@@ -73,8 +74,8 @@ WhatsInMyFood is a web application that uses AI to analyze food ingredient lists
 
 - Node.js 20 or higher
 - npm, yarn, pnpm, or bun
-- Supabase account for image storage
 - Google AI API key for Gemini
+- (Optional) An [Upstash](https://upstash.com/) Redis database for rate limiting
 
 ### Installation
 
@@ -94,53 +95,68 @@ WhatsInMyFood is a web application that uses AI to analyze food ingredient lists
    ```
 
 3. **Set up environment variables**
-   
+
    Create a `.env.local` file in the root directory:
    ```env
+   # Required — Gemini API key
    GOOGLE_API_KEY=your_google_ai_api_key
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-   NEXT_PUBLIC_SUPABASE_KEY=your_supabase_anon_key
-   NEXT_PUBLIC_SUPABASE_DOMAIN=your_supabase_domain
+
+   # Optional — Upstash Redis for rate limiting /api/parseIngredient.
+   # If omitted (or if Upstash errors), rate limiting fails open (all requests allowed).
+   UPSTASH_REDIS_REST_URL=your_upstash_rest_url
+   UPSTASH_REDIS_REST_TOKEN=your_upstash_rest_token
+
+   # Optional — analytics
+   NEXT_PUBLIC_POSTHOG_KEY=your_posthog_key
+   NEXT_PUBLIC_POSTHOG_HOST=your_posthog_host
+
+   # Optional — Clerk (auth is currently not enforced)
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
+   CLERK_SECRET_KEY=your_clerk_secret
    ```
 
-4. **Set up Supabase storage**
-   - Create a new bucket called `IngredientBucket` in your Supabase project
-   - Configure public access for image retrieval
-
-5. **Run the development server**
+4. **Run the development server**
    ```bash
    npm run dev
    ```
 
-6. **Open your browser**
-   
+5. **Open your browser**
+
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## 📁 Project Structure
 
 ```
 whatsInMyFood/
-├── app/                    # Next.js App Router
-│   ├── api/               # API routes
-│   │   └── parseIngredient/  # AI ingredient parsing endpoint
-│   ├── components/        # React components
+├── app/                       # Next.js App Router
+│   ├── api/
+│   │   └── parseIngredient/   # AI ingredient parsing endpoint (multipart upload + rate limit)
+│   ├── components/            # React components
 │   │   ├── HeroSection.tsx
 │   │   ├── HowItWorks.tsx
-│   │   ├── ImageUploader.tsx
+│   │   ├── ImageUploader.tsx  # Owns the scan → parse → results flow
+│   │   ├── CameraModal.tsx    # Live camera capture
 │   │   ├── ingredient-grid.tsx
+│   │   ├── ResultSummary.tsx
 │   │   ├── FilterDropdown.tsx
-│   │   └── ui/            # Reusable UI components
-│   ├── fonts/             # Custom fonts
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Home page
-│   └── manifest.ts        # PWA manifest
-├── lib/                   # Utility functions
-│   ├── supabase.ts        # Supabase client
-│   └── consant.ts         # Constants and examples
-├── public/                # Static assets
+│   │   └── ui/                # Reusable UI components
+│   ├── layout.tsx             # Root layout
+│   ├── page.tsx               # Marketing landing page
+│   ├── dashboard/page.tsx     # The actual app (renders ImageUploader)
+│   └── manifest.ts            # PWA manifest
+├── lib/                       # Utilities
+│   ├── image.ts               # Client-side image compression
+│   ├── rate-limit.ts          # Upstash-backed per-IP rate limiting
+│   ├── nova.ts                # NOVA classification helpers
+│   ├── verdict.ts             # Result summary logic
+│   ├── i18n.ts                # Localized UI strings
+│   ├── utils.ts               # cn() class-name helper
+│   └── consant.ts             # Example ingredient data (note: filename is misspelled)
+├── public/                    # Static assets
+│   ├── example-ingredients.jpg
 │   ├── whatsinmyfood-logo.png
 │   └── web-app-manifest-*.png
-└── AGENTS.md             # Development guide
+└── AGENTS.md                  # Development guide
 ```
 
 ## 🔧 Configuration
@@ -154,9 +170,12 @@ The app uses the NOVA food classification system to categorize ingredients:
 4. **Ultra-processed foods**: Industrial formulations with additives (e.g., E-numbers, artificial flavors)
 
 ### AI Model Configuration
-The app uses Google's Gemini 3 Flash model with:
+The app uses Google's Gemini 3 Flash model (`gemini-3-flash-preview`) with:
 - JSON structured output for consistent parsing
-- Schema validation for ingredient data
+- A fixed response schema for ingredient data (`name`, `description`, `nova_classification`, `reason`) plus a detected `language`
+
+### Rate Limiting
+`/api/parseIngredient` is rate-limited per IP using Upstash Redis (sliding window, 15 requests per IP per 24h by default — tunable in `lib/rate-limit.ts`). Without Upstash credentials, rate limiting fails open so local development works unchanged.
 
 ## 📝 Scripts
 
@@ -174,12 +193,13 @@ npm run lint         # Run ESLint
 WhatsInMyFood is optimized for deployment on Vercel:
 
 1. **Connect your repository** to Vercel
-2. **Configure environment variables** in Vercel dashboard:
+2. **Configure environment variables** in the Vercel dashboard:
    ```
-   GOOGLE_API_KEY
-   NEXT_PUBLIC_SUPABASE_URL
-   NEXT_PUBLIC_SUPABASE_KEY
-   NEXT_PUBLIC_SUPABASE_DOMAIN
+   GOOGLE_API_KEY                 # required
+   UPSTASH_REDIS_REST_URL         # recommended in production
+   UPSTASH_REDIS_REST_TOKEN       # recommended in production
+   NEXT_PUBLIC_POSTHOG_KEY        # optional
+   NEXT_PUBLIC_POSTHOG_HOST       # optional
    ```
 3. **Deploy** - Vercel will automatically build and deploy your app
 
@@ -187,7 +207,6 @@ WhatsInMyFood is optimized for deployment on Vercel:
 
 WhatsInMyFood is a Progressive Web App (PWA) that can be installed on mobile devices:
 - Add to home screen on iOS and Android
-- Offline-capable with service workers
 - App-like experience with custom splash screens
 - Optimized icons for all device sizes
 
@@ -223,7 +242,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 - Built with [Next.js](https://nextjs.org/)
 - AI powered by [Google Gemini](https://ai.google.dev/)
-- Storage by [Supabase](https://supabase.com/)
+- Rate limiting by [Upstash](https://upstash.com/)
 - Analytics by [PostHog](https://posthog.com/)
 - Hosted on [Vercel](https://vercel.com/)
 - Icons by [Heroicons](https://heroicons.com/)
