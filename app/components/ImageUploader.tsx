@@ -156,6 +156,7 @@ export function ImageUploader() {
       const formData = new FormData();
       formData.append("text", result.ingredientsText);
       formData.append("targetLang", targetLang);
+      formData.append("barcode", ean);
       const res = await fetch("/api/parseIngredient", {
         method: "POST",
         body: formData,

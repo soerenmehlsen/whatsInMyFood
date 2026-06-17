@@ -2,9 +2,21 @@ import {GoogleGenerativeAI, SchemaType, type Schema} from "@google/generative-ai
 import { NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getFixedLanguage } from "@/lib/languages";
+import { getCachedParse, setCachedParse } from "@/lib/cache";
 
 // Initialize the Google AI client
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+
+// Server-side image guard. The client compresses before upload, but the route
+// must not trust that — base64-ing an arbitrarily large file would balloon RAM.
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8 MB
+
+// Gemini occasionally returns 0, 5, or a decimal; coerce to a valid NOVA group.
+function clampNova(value: unknown): number {
+  const n = Math.round(Number(value));
+  // ponytail: invalid → group 1 (minimally processed) as the neutral default
+  return Number.isFinite(n) ? Math.min(4, Math.max(1, n)) : 1;
+}
 
 // Defines the JSON schema for a consistent and structured output
 const schema: Schema = {
@@ -88,6 +100,42 @@ export async function POST(request: Request) {
     );
   }
 
+  if (hasImage) {
+    const file = image as File;
+    if (!file.type.startsWith("image/")) {
+      return NextResponse.json(
+        { error: "Uploaded file is not an image" },
+        { status: 400 },
+      );
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      return NextResponse.json(
+        { error: "Image too large" },
+        { status: 413 },
+      );
+    }
+  }
+
+  // Barcode results are deterministic per (barcode, language): serve a cached
+  // parse and skip the Gemini call entirely for products we've seen before.
+  const barcodeInput = formData.get("barcode");
+  const barcode = typeof barcodeInput === "string" ? barcodeInput.trim() : "";
+  const cacheKey = barcode
+    ? `${barcode}:${requestedLang?.code ?? "auto"}`
+    : null;
+
+  if (cacheKey) {
+    const cached = await getCachedParse(cacheKey);
+    if (cached) {
+      return NextResponse.json({
+        success: true,
+        ingredient: cached.ingredient,
+        language: cached.language,
+        cached: true,
+      });
+    }
+  }
+
   const model = genAI.getGenerativeModel({
     model: "gemini-3.1-flash-lite",
     generationConfig: {
@@ -152,7 +200,6 @@ Also return a top-level 'language' field: the ISO 639-1 code (e.g. 'da', 'en') o
   let parsed;
   try {
     parsed = JSON.parse(response.text());
-    console.log({ parsed });
   } catch (error) {
     console.error('Error parsing ingredients JSON:', error);
     return NextResponse.json(
@@ -164,15 +211,23 @@ Also return a top-level 'language' field: the ISO 639-1 code (e.g. 'da', 'en') o
   // Log the total request duration
   console.log(`Total request duration: ${Date.now() - outputStartTime}ms`);
 
-  return NextResponse.json({
-    success: true,
-    ingredient: parsed.ingredient,
-    language: requestedLang
-      ? requestedLang.code
-      : typeof parsed.language === "string"
-        ? parsed.language
-        : "en",
-  });
+  const ingredient = Array.isArray(parsed.ingredient)
+    ? parsed.ingredient.map((item: Record<string, unknown>) => ({
+        ...item,
+        nova_classification: clampNova(item.nova_classification),
+      }))
+    : [];
+  const language = requestedLang
+    ? requestedLang.code
+    : typeof parsed.language === "string"
+      ? parsed.language
+      : "en";
+
+  if (cacheKey) {
+    await setCachedParse(cacheKey, { ingredient, language });
+  }
+
+  return NextResponse.json({ success: true, ingredient, language });
 
 } catch (error) {
     // Logging the error
