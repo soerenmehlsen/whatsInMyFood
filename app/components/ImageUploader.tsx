@@ -16,6 +16,7 @@ import CameraModal from "./CameraModal";
 import { Input } from "./ui/input";
 import { IngredientGrid } from "./ingredient-grid";
 import { ResultSummary } from "./ResultSummary";
+import { compareProducts } from "@/lib/compare";
 import { Fade } from "./ui/fade";
 import { exampleUrl, exampleIngredient } from "@/lib/consant";
 import FilterDropdown from "./FilterDropdown";
@@ -47,6 +48,9 @@ export function ImageUploader() {
   const [parsedIngredient, setParsedIngredient] = useState<IngredientItem[]>(
     [],
   );
+  const [compareItems, setCompareItems] = useState<IngredientItem[] | null>(
+    null,
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedNovaFilters, setSelectedNovaFilters] = useState<number[]>([]);
   const [showCamera, setShowCamera] = useState(false);
@@ -72,12 +76,20 @@ export function ImageUploader() {
     setStatus("initial");
     setIngredientUrl(undefined);
     setParsedIngredient([]);
+    setCompareItems(null);
     setSearchTerm("");
     setSelectedNovaFilters([]);
     setShowCamera(false);
     setShowScanner(false);
     setNotice(null);
     setLanguage("en");
+  };
+
+  // Snapshot the current result, then reset to scan a second product against it.
+  const handleCompare = () => {
+    const snapshot = parsedIngredient;
+    handleReset();
+    setCompareItems(snapshot);
   };
 
   // Shared handling for /api/parseIngredient responses (image and text paths).
@@ -374,16 +386,45 @@ export function ImageUploader() {
             <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
               Found {parsedIngredient.length} ingredients
             </h2>
-            {!ingredientUrl && (
+            <div className="flex shrink-0 items-center gap-2">
               <button
-                onClick={handleReset}
-                className="inline-flex shrink-0 items-center gap-2 rounded-full border border-hairline-strong bg-surface px-4 py-2 text-sm font-medium text-ink transition hover:border-muted"
+                onClick={handleCompare}
+                className="inline-flex items-center gap-2 rounded-full border border-hairline-strong bg-surface px-4 py-2 text-sm font-medium text-ink transition hover:border-muted"
               >
-                Scan again
+                Compare with another →
               </button>
-            )}
+              {!ingredientUrl && (
+                <button
+                  onClick={handleReset}
+                  className="inline-flex items-center gap-2 rounded-full border border-hairline-strong bg-surface px-4 py-2 text-sm font-medium text-ink transition hover:border-muted"
+                >
+                  Scan again
+                </button>
+              )}
+            </div>
           </div>
-          <ResultSummary items={parsedIngredient} language={language} />
+          {compareItems &&
+            (() => {
+              const winner = compareProducts(parsedIngredient, compareItems);
+              return (
+                <div className="mb-8">
+                  <p className="mb-3 text-lg font-bold text-ink">
+                    {winner === "tie"
+                      ? "Equally processed"
+                      : winner === "a"
+                        ? "This one is less processed ✓"
+                        : "Your previous scan was less processed"}
+                  </p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <ResultSummary items={parsedIngredient} language={language} />
+                    <ResultSummary items={compareItems} language={language} />
+                  </div>
+                </div>
+              );
+            })()}
+          {!compareItems && (
+            <ResultSummary items={parsedIngredient} language={language} />
+          )}
           <div className="mb-8 flex gap-3">
             <div className="relative flex-1">
               <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
